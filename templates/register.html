@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - PeriodiPal</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/register.css">
+</head>
+<body>
+  <div class="bg-elements">
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+  </div>
+
+  <div class="register-container">
+    <div class="header-section">
+      <div class="app-logo">
+        <div class="logo-icon">🌈</div>
+        <h1 class="app-title">PeriodiPal</h1>
+      </div>
+      <div class="welcome-subtitle">Join our friendly community! ✨</div>
+    </div>
+
+    <div class="register-form">
+      <h2 class="form-title">Create Account 🌟</h2>
+      
+      <div class="success-message" id="registerSuccess">
+        Account created successfully! Welcome to PeriodiPal! 🎉
+      </div>
+
+      <form id="registerFormElement">
+        <div class="input-group">
+          <label for="registerUsername">Username</label>
+          <input type="text" id="registerUsername" class="input-field" required>
+          <div class="error-message" id="registerUsernameError"></div>
+        </div>
+
+        <div class="input-group">
+          <label for="registerEmail">Email</label>
+          <input type="email" id="registerEmail" class="input-field" required>
+          <div class="error-message" id="registerEmailError"></div>
+        </div>
+
+        <div class="input-group">
+          <label for="registerPassword">Password</label>
+          <div class="password-input">
+            <input type="password" id="registerPassword" class="input-field" required>
+            <button type="button" id="registerPasswordToggle" class="password-toggle">👁️</button>
+          </div>
+          <div class="error-message" id="registerPasswordError"></div>
+        </div>
+
+        <div class="password-requirements" id="passwordRequirements">
+          <div class="requirement" data-requirement="minLength">
+            <span class="requirement-icon">○</span>
+            At least 8 characters
+          </div>
+          <div class="requirement" data-requirement="uppercase">
+            <span class="requirement-icon">○</span>
+            One uppercase letter
+          </div>
+          <div class="requirement" data-requirement="number">
+            <span class="requirement-icon">○</span>
+            One number
+          </div>
+        </div>
+
+        <div class="age-selection">
+          <label>Select your age group:</label>
+          <div class="age-options">
+            <button type="button" class="age-btn" data-age="13-14">
+              <div class="age-avatar">👧</div>
+              <span>13-14</span>
+            </button>
+            <button type="button" class="age-btn" data-age="15-16">
+              <div class="age-avatar">🧒</div>
+              <span>15-16</span>
+            </button>
+            <button type="button" class="age-btn" data-age="17-19">
+              <div class="age-avatar">👩</div>
+              <span>17-19</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="role-selection">
+          <label>Select your role:</label>
+          <div class="role-options">
+            <button type="button" class="role-btn selected" data-role="student">Student</button>
+            <button type="button" class="role-btn" data-role="teacher">Teacher</button>
+          </div>
+        </div>
+
+        <button type="submit" class="auth-btn" id="registerBtn">
+          <div class="loading-spinner"></div>
+          <span class="btn-text">Create Account</span>
+        </button>
+      </form>
+
+      <div class="form-switch">
+        <span class="form-switch-text">Already have an account? </span>
+        <a href="/" class="form-switch-link">Sign in here!</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tour elements (hidden by default) -->
+  <div id="tourOverlay" class="tour-overlay"></div>
+  <div id="tourTooltip" class="tour-tooltip">
+    <div class="mascot-sprite" id="mascotSprite"></div>
+    <div class="tour-content"></div>
+    <div class="tour-buttons">
+      <button id="prevBtn" class="tour-btn prev">Previous</button>
+      <button id="skipBtn" class="tour-btn skip">Skip Tour</button>
+      <button id="nextBtn" class="tour-btn next">Next</button>
+    </div>
+    <div id="tourProgress" class="tour-progress"></div>
+  </div>
+
+  <script type="module" src="/static/js/register.js">
+   
+  </script>
+</body>
+</html>

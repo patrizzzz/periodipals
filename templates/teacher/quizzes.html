@@ -1,0 +1,1332 @@
+{% extends "teacher/dashboard.html" %}
+
+{% block title %}Quizzes - Teacher Dashboard{% endblock %}
+
+{% block page_title %}Quiz Management{% endblock %}
+
+{% block content %}
+<!-- Breadcrumbs -->
+<div class="breadcrumbs">
+    <div class="breadcrumb-item">
+        <i class="fas fa-home breadcrumb-icon"></i>
+        <a href="/teacher/dashboard">Dashboard</a>
+    </div>
+    <div class="breadcrumb-item active">
+        <i class="fas fa-question-circle breadcrumb-icon"></i>
+        Quiz Management
+    </div>
+</div>
+
+<div class="quiz-management">
+    <div class="quiz-header">
+        <div class="header-left">
+            <h2><i class="fas fa-question-circle"></i> Manage Quizzes</h2>
+            <p>Create and manage interactive quizzes for your students</p>
+        </div>
+        <button class="quiz-btn btn-primary glow-effect" id="addQuizBtn">
+            <i class="fas fa-plus"></i> Create New Quiz
+        </button>
+    </div>
+    
+    <!-- Quiz Overview Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <i class="fas fa-question-circle"></i>
+            </div>
+            <div class="stat-value" id="totalQuizzes">0</div>
+            <div class="stat-label">Total Quizzes</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <i class="fas fa-play"></i>
+            </div>
+            <div class="stat-value" id="activeQuizzes">0</div>
+            <div class="stat-label">Active Quizzes</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-value" id="totalAttempts">0</div>
+            <div class="stat-label">Total Attempts</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-value" id="avgScore">-</div>
+            <div class="stat-label">Average Score</div>
+        </div>
+    </div>
+
+    <!-- Quiz Filters -->
+    <div class="controls-section">
+        <div class="search-filters">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="quizSearch" placeholder="Search quizzes...">
+                <button class="clear-search" id="clearSearch">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="filter-dropdown">
+                <select id="quizFilter" class="form-input">
+                    <option value="all">All</option>
+                    <option value="active">Active</option>
+                    <option value="draft">Draft</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+            <div class="sort-dropdown">
+                <select id="sortQuizzes">
+                    <option value="date-desc">Newest First</option>
+                    <option value="date-asc">Oldest First</option>
+                    <option value="attempts">Most Attempts</option>
+                    <option value="score">Highest Score</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <div class="quiz-list" id="quizList">
+        <!-- Quiz cards will be dynamically inserted here -->
+    </div>
+</div>
+
+<!-- Quiz Modal -->
+<div class="quiz-modal" id="quizModal">
+    <div class="modal-content">
+        <button class="close-modal" id="closeModal">&times;</button>
+        <div class="modal-header">
+            <h3>Create New Quiz</h3>
+        </div>
+        <form id="quizForm">
+            <div class="form-group">
+                <label class="form-label" for="quizTitle">Quiz Title</label>
+                <input type="text" id="quizTitle" name="title" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="quizDescription">Description</label>
+                <textarea id="quizDescription" name="description" class="form-input" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="quizDuration">Duration (minutes)</label>
+                <input type="number" id="quizDuration" name="duration" class="form-input" min="1" value="30" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="maxAttempts">Max Attempts</label>
+                <input type="number" id="maxAttempts" name="maxAttempts" class="form-input" min="1" value="3" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="passingScore">Passing Score (%)</label>
+                <input type="number" id="passingScore" name="passingScore" class="form-input" min="0" max="100" value="70" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="quizStatus">Status</label>
+                <select id="quizStatus" name="status" class="form-input" required>
+                    <option value="draft">Draft</option>
+                    <option value="active">Active</option>
+                </select>
+            </div>
+            
+            <div class="questions-section">
+                <h4>Questions</h4>
+                <div id="questionsList">
+                    <!-- Default first question -->
+                    <div class="question-field">
+                        <div class="question-header">
+                            <span class="question-number">Question 1</span>
+                            <select name="question_type_1" class="form-input question-type-select" onchange="window.quizManager.handleQuestionTypeChange(this)">
+                                <option value="multiple-choice">Multiple Choice</option>
+                                <option value="true-false">True/False</option>
+                                <option value="short-answer">Short Answer</option>
+                            </select>
+                        </div>
+                        <input type="text" name="question_text_1" class="form-input" placeholder="Enter your question" required>
+                        <div class="answer-options">
+                            <div class="option-row">
+                                <input type="text" name="option_1_1" class="form-input" placeholder="Option 1" required>
+                                <div class="correct-toggle">
+                                    <input type="radio" name="correct_1" value="0" required>
+                                    <label>Correct</label>
+                                </div>
+                            </div>
+                            <div class="option-row">
+                                <input type="text" name="option_1_2" class="form-input" placeholder="Option 2" required>
+                                <div class="correct-toggle">
+                                    <input type="radio" name="correct_1" value="1" required>
+                                    <label>Correct</label>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="add-option-btn" onclick="window.quizManager.addOptionRow(this)">
+                            <i class="fas fa-plus"></i> Add Option
+                        </button>
+                    </div>
+                </div>
+                <button type="button" class="quiz-btn btn-secondary" onclick="window.quizManager.addQuestionField()">
+                    <i class="fas fa-plus"></i> Add Question
+                </button>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="quiz-btn btn-primary">Create Quiz</button>
+                <button type="button" class="quiz-btn btn-secondary" onclick="window.quizManager.closeModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+    <!-- Quiz Results Modal -->
+    <div class="modal results-modal" id="resultsModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeResultsModal">&times;</button>
+            <div class="modal-header">
+                <h3>Quiz Results</h3>
+            </div>
+            <div class="modal-body">
+                <div class="results-stats-overview">
+                    <div class="stat-box">
+                        <div class="label">Total Students</div>
+                        <div class="value" id="totalStudents">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Attempted</div>
+                        <div class="value" id="attemptedCount">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Passed</div>
+                        <div class="value" id="passedCount">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Average Score</div>
+                        <div class="value" id="averageScore">-</div>
+                    </div>
+                </div>
+                
+                <div class="results-filters">
+                    <select id="scoreFilter" class="form-input">
+                        <option value="all">All Results</option>
+                        <option value="passed">Passed</option>
+                        <option value="failed">Failed</option>
+                        <option value="not-attempted">Not Attempted</option>
+                    </select>
+                    <input type="text" id="studentSearch" class="form-input" placeholder="Search students...">
+                </div>
+
+                <div class="results-table-wrapper">
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Score</th>
+                                <th>Status</th>
+                                <th>Attempts</th>
+                                <th>Last Attempt</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody">
+                            <!-- Results will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Notification Container -->
+    <div id="notification" class="notification"></div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/teacher-quiz.css') }}">
+<style>
+    .quiz-management {
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: var(--radius-lg);
+        border: 1px solid #ddd;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .quiz-header {
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .header-left {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .header-left h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #000;
+        margin-bottom: 0.5rem;
+        line-height: 1.2;
+    }
+
+    .header-left p {
+        color: #333;
+        font-size: 1rem;
+        line-height: 1.4;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 15px;
+        border-radius: 12px;
+        text-align: center;
+        border: 1px solid #ddd;
+        backdrop-filter: blur(10px);
+        transition: transform 0.3s ease;
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-header {
+        font-size: 1.5rem;
+        color: var(--primary);
+        margin-bottom: 8px;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #000;
+        margin: 8px 0;
+    }
+
+    .stat-label {
+        color: #333;
+        font-size: 0.85rem;
+        line-height: 1.2;
+    }
+
+    .search-filters {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: var(--radius-lg);
+        padding: 1rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid #ddd;
+        margin-bottom: 2rem;
+    }
+
+    .search-bar {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .search-bar input {
+        width: 100%;
+        padding: 0.75rem 2.5rem;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid #ddd;
+        border-radius: var(--radius-md);
+        color: #000;
+        font-size: 1rem;
+    }
+
+    .search-bar input::placeholder {
+        color: #666;
+    }
+
+    .search-bar i {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .clear-search {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #666;
+        cursor: pointer;
+        padding: 0.25rem;
+    }
+
+    .filter-dropdown { margin: .5rem 0 1rem; }
+
+    .sort-dropdown select {
+        width: 100%;
+        padding: 0.75rem 2.5rem 0.75rem 1rem;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid #ddd;
+        border-radius: var(--radius-md);
+        color: #000;
+        font-size: 1rem;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.2em;
+    }
+
+    .sort-dropdown select option {
+        background: #fff;
+        color: #000;
+    }
+
+    .quiz-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    .quiz-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .quiz-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .quiz-status {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-bottom: 12px;
+    }
+
+    .quiz-status.active { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .quiz-status.draft { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .quiz-status.completed { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+
+    .quiz-card h3 {
+        font-size: 1.2rem;
+        color: #000;
+        margin: 8px 0;
+        line-height: 1.3;
+    }
+
+    .quiz-meta {
+        display: flex;
+        gap: 10px;
+        margin: 12px 0;
+        color: #333;
+        font-size: 0.85rem;
+        flex-wrap: wrap;
+    }
+
+    .quiz-stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: #333;
+        margin: 12px 0;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+
+    .quiz-btn {
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: none;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.9rem;
+        flex: 1;
+        justify-content: center;
+        min-width: 0;
+    }
+
+    .quiz-btn i {
+        font-size: 0.85rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #fff;
+        border: 1px solid #1e3a8a;
+    }
+
+    .btn-secondary {
+        background: #334155; /* slate-700 */
+        color: #fff;
+        border: 1px solid #1f2937; /* slate-800 */
+    }
+
+    .btn-danger {
+        background: #ef4444; /* red-500 */
+        color: #fff;
+        border: 1px solid #dc2626; /* red-600 */
+    }
+
+    .glow-effect {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .glow-effect::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, 
+            rgba(255,255,255,0.1), 
+            rgba(255,255,255,0), 
+            rgba(255,255,255,0.1), 
+            rgba(255,255,255,0));
+        z-index: -1;
+        animation: glowAnimation 2s linear infinite;
+        border-radius: inherit;
+    }
+
+    @keyframes glowAnimation {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+        box-sizing: border-box;
+    }
+
+    .modal.show {
+        display: flex;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal .modal-content {
+        width: 100%;
+        max-width: 500px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: var(--radius-lg);
+        border: 1px solid #ddd;
+        backdrop-filter: blur(10px);
+        padding: 1.5rem;
+        position: relative;
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal.show .modal-content {
+        transform: translateY(0);
+    }
+
+    .modal .close-modal {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: none;
+        border: none;
+        color: #666;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        z-index: 10;
+    }
+
+    .modal .close-modal:hover {
+        background: rgba(0, 0, 0, 0.05);
+        color: #000;
+    }
+
+    .modal .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-right: 2rem;
+    }
+
+    .modal .modal-header h3 {
+        color: #000;
+        font-size: 1.3rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .form-group {
+        margin-bottom: 1.2rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.4rem;
+        color: #000;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.75rem 0.75rem;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid #ddd;
+        border-radius: var(--radius-md);
+        color: #000;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+
+    .form-input::placeholder {
+        color: #666;
+    }
+
+    select.form-input option {
+        background: #fff;
+        color: #000;
+    }
+
+    .questions-section {
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+    }
+
+    .questions-section h4 {
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+        color: #000;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .questions-section h4::before {
+        content: '\f059';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        color: var(--primary);
+    }
+
+    .question-field {
+        background: white;
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .question-field .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .question-number {
+        font-weight: 600;
+        color: var(--primary);
+        font-size: 0.9rem;
+    }
+
+    .question-type-select {
+        width: auto;
+        min-width: 120px;
+        flex: 1;
+        max-width: 180px;
+    }
+
+    .answer-options {
+        margin-top: 1rem;
+    }
+
+    .option-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .option-row input[type="text"] {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .option-row .correct-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        color: #666;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .option-row .remove-option {
+        color: var(--danger);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.4rem;
+        border-radius: 50%;
+        transition: background 0.2s ease;
+        font-size: 0.8rem;
+    }
+
+    .option-row .remove-option:hover {
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    .add-option-btn {
+        margin-top: 1rem;
+        width: 100%;
+        padding: 0.6rem;
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--primary);
+        border: 1px dashed var(--primary);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+    }
+
+    .add-option-btn:hover {
+        background: rgba(99, 102, 241, 0.2);
+    }
+
+    .option-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+    }
+
+    .option-item .option-text {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .correct-radio {
+        margin-right: 3px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .form-actions .quiz-btn {
+        flex: 1;
+        min-width: 120px;
+        justify-content: center;
+    }
+
+    .results-modal .modal-content,
+    .questions-modal .modal-content {
+        max-width: 700px;
+    }
+
+    .results-table-wrapper {
+        overflow-x: auto;
+        margin-top: 15px;
+    }
+
+    .results-table,
+    .questions-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 600px;
+    }
+
+    .results-table th,
+    .results-table td,
+    .questions-table th,
+    .questions-table td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        color: #000;
+        font-size: 0.9rem;
+    }
+
+    .results-table th,
+    .questions-table th {
+        background: rgba(0, 0, 0, 0.05);
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .results-table tr:hover,
+    .questions-table tr:hover {
+        background: rgba(0, 0, 0, 0.02);
+    }
+
+    .notification {
+        display: none;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        left: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        z-index: 1000;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .notification.info {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+        background: #3b82f6;
+        color: white;
+    }
+
+    .notification.error {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+        background: #ef4444;
+        color: white;
+    }
+
+    .notification.success {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+        background: #10b981;
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: #333;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: var(--primary);
+    }
+
+    .empty-state h3 {
+        color: #000;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+    }
+
+    .loading-spinner {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        padding: 1rem;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top: 3px solid var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .loading-spinner p {
+        color: white;
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    .question-item {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 12px;
+        border: 1px solid #ddd;
+    }
+
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .question-header h4 {
+        color: #000;
+        margin: 0;
+        font-size: 1.1rem;
+        line-height: 1.2;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .question-meta {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .question-type {
+        background: rgba(99, 102, 241, 0.2);
+        color: #818cf8;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+
+    .question-points {
+        background: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+
+    .question-text {
+        color: #000;
+        margin: 12px 0;
+        line-height: 1.4;
+        font-size: 0.95rem;
+    }
+
+    .question-options {
+        margin: 12px 0;
+    }
+
+    .option {
+        padding: 8px;
+        margin: 4px 0;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 6px;
+        color: #000;
+        border: 1px solid #ddd;
+        font-size: 0.9rem;
+        line-height: 1.3;
+    }
+
+    .option.correct {
+        background: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .question-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+    }
+
+    .question-actions .quiz-btn {
+        flex: 1;
+        min-width: 80px;
+        font-size: 0.85rem;
+    }
+
+    .results-stats-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+
+    .results-stats-overview .stat-box {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+
+    .results-stats-overview .stat-box .label {
+        font-size: 0.8rem;
+        color: #333;
+        margin-bottom: 4px;
+        line-height: 1.2;
+    }
+
+    .results-stats-overview .stat-box .value {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #000;
+    }
+
+    .results-filters {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+
+    .results-filters select,
+    .results-filters input {
+        flex: 1;
+        min-width: 150px;
+        font-size: 0.9rem;
+    }
+
+    /* Mobile-specific adjustments */
+    @media (max-width: 768px) {
+        .quiz-management {
+            padding: 0.75rem;
+        }
+
+        .quiz-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .quiz-header .quiz-btn {
+            width: 100%;
+            justify-content: center;
+            padding: 0.75rem 1rem;
+        }
+
+        .header-left h2 {
+            font-size: 1.3rem;
+        }
+
+        .header-left p {
+            font-size: 0.9rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .stat-card {
+            padding: 12px;
+            min-height: 100px;
+        }
+
+        .stat-header {
+            font-size: 1.3rem;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+        }
+
+        .filter-buttons {
+            gap: 0.3rem;
+        }
+
+        .filter-btn {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.8rem;
+            min-width: 60px;
+        }
+
+        .quiz-list {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .quiz-card {
+            padding: 15px;
+        }
+
+        .quiz-card h3 {
+            font-size: 1.1rem;
+        }
+
+        .quiz-meta, .quiz-stats {
+            font-size: 0.8rem;
+        }
+
+        .action-buttons {
+            gap: 6px;
+        }
+
+        .quiz-btn {
+            font-size: 0.8rem;
+            padding: 5px 8px;
+        }
+
+        .modal .modal-content {
+            padding: 1rem;
+            margin: 0.5rem;
+        }
+
+        .modal .modal-header h3 {
+            font-size: 1.1rem;
+        }
+
+        .form-input {
+            padding: 0.6rem;
+        }
+
+        .question-field {
+            padding: 0.75rem;
+        }
+
+        .question-type-select {
+            min-width: 100px;
+            max-width: 140px;
+        }
+
+        .option-row {
+            gap: 0.3rem;
+        }
+
+        .option-row .correct-toggle {
+            font-size: 0.8rem;
+        }
+
+        .form-actions .quiz-btn {
+            min-width: 100px;
+            font-size: 0.9rem;
+        }
+
+        .results-stats-overview {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .results-stats-overview .stat-box {
+            padding: 8px;
+        }
+
+        .results-stats-overview .stat-box .label {
+            font-size: 0.75rem;
+        }
+
+        .results-stats-overview .stat-box .value {
+            font-size: 1rem;
+        }
+
+        .results-filters {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .results-filters select,
+        .results-filters input {
+            min-width: auto;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 6px 4px;
+            font-size: 0.8rem;
+        }
+
+        .notification {
+            top: 10px;
+            right: 10px;
+            left: 10px;
+            font-size: 0.85rem;
+            padding: 10px 15px;
+        }
+
+        .question-actions .quiz-btn {
+            font-size: 0.8rem;
+            min-width: 70px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .quiz-management {
+            padding: 0.5rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .filter-buttons {
+            flex-direction: column;
+        }
+
+        .filter-btn {
+            flex: none;
+        }
+
+        .modal .modal-content {
+            padding: 0.75rem;
+        }
+
+        .question-field .question-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .question-type-select {
+            width: 100%;
+            max-width: none;
+        }
+
+        .option-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .option-row input[type="text"] {
+            width: 100%;
+        }
+
+        .option-row .correct-toggle {
+            align-self: flex-end;
+        }
+
+        .results-stats-overview {
+            grid-template-columns: 1fr;
+        }
+
+        .results-table {
+            font-size: 0.75rem;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 4px 2px;
+        }
+    }
+
+    /* Landscape orientation adjustments for mobile */
+    @media (max-width: 768px) and (orientation: landscape) {
+        .stats-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .quiz-list {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    /* Touch-friendly improvements */
+    @media (pointer: coarse) {
+        .quiz-btn, .filter-btn, .close-modal, .clear-search {
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .form-input, .search-bar input {
+            min-height: 44px;
+        }
+
+        .option-row .correct-toggle input[type="radio"] {
+            transform: scale(1.2);
+            margin: 0 8px 0 4px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script type="module" src="/static/js/quiz-manager.js"></script>
+{% endblock %}

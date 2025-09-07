@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Teacher Dashboard - PeriodiPal{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% block head %}
+    <link rel="stylesheet" href="/static/css/teacher-dashboard.css">
+    {% endblock %}
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        {% block sidebar %}
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">🌈</span>
+                <span class="logo-text">PeriodiPal</span>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="/teacher/dashboard" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                    <div class="topic-indicator">Overview</div>
+                </a>
+                <a href="/teacher/resources" class="nav-item {% if active_page == 'resources' %}active{% endif %}">
+                    <i class="fas fa-book"></i>
+                    <span>Resources</span>
+                    <div class="topic-indicator">Learning Materials</div>
+                </a>
+                <a href="/teacher/quizzes" class="nav-item {% if active_page == 'quizzes' %}active{% endif %}">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Quizzes</span>
+                    <div class="topic-indicator">Assessments</div>
+                </a>
+                <a href="/teacher/progress" class="nav-item {% if active_page == 'progress' %}active{% endif %}">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Student Progress</span>
+                    <div class="topic-indicator">Analytics</div>
+                </a>
+            </nav>
+        </aside>
+        {% endblock %}
+
+        <!-- Main Content Area -->
+        <main class="main-content {% if active_page != 'dashboard' %}full-width{% endif %}" data-teacher-id="{{ session.uid }}">
+            <div class="content-wrapper">
+                <!-- Top Navigation -->
+                <header class="top-nav">
+                    <div class="nav-left">
+                        <button class="menu-toggle" id="menuToggle">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+                    </div>
+
+                <div class="nav-right">
+                    <div class="notifications">
+                        <button class="notification-btn" id="notificationBtn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">0</span>
+                        </button>
+                    </div>
+                    <div class="profile-menu">
+                        <button class="profile-btn" id="profileBtn">
+                            <div class="profile-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span>{{ teacher_name }}</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <a href="/teacher/profile">
+                                <i class="fas fa-user-circle"></i>
+                                Profile
+                            </a>
+                            <a href="/teacher/settings">
+                                <i class="fas fa-cog"></i>
+                                Settings
+                            </a>
+                            <a href="#">
+                                <i class="fas fa-question-circle"></i>
+                                Help & Support
+                            </a>
+                            <hr>
+                            <a href="#" class="logout-btn" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                {% block content %}
+                <!-- Teacher Code Card -->
+                <div class="teacher-code-card">
+                    <h2>
+                        <i class="fas fa-key"></i>
+                        Your Teacher Code
+                    </h2>
+                    <div class="code-display">
+                        <input type="text" id="teacherCode" value="{{ teacher_code }}" readonly>
+                        <button id="copyCode" class="copy-btn" title="Copy code">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <p class="code-help">
+                        <i class="fas fa-info-circle"></i>
+                        Share this unique code with your students so they can join your class and access your resources.
+                    </p>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-value" id="activeStudentsCount">0</div>
+                        <div class="stat-label">Active Students</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="stat-value" id="resourcesCount">0</div>
+                        <div class="stat-label">Resources Shared</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div class="stat-value" id="quizzesCount">0</div>
+                        <div class="stat-label">Active Quizzes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div class="stat-value" id="avgCompletion">0%</div>
+                        <div class="stat-label">Avg. Completion</div>
+                    </div>
+                </div>
+                    {% if active_page == 'dashboard' %}
+                    <!-- Student Sidebar -->
+                    <aside class="student-sidebar">
+                        <div class="sidebar-header">
+                            <h3><i class="fas fa-users"></i> Connected Students</h3>
+                            <span class="online-count" id="onlineCount">0</span>
+                        </div>
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="studentSearch" placeholder="Search students...">
+                        </div>
+                        <div class="student-list" id="studentList">
+                            <!-- Example static items for layout reference -->
+                            <div class="student-item">
+                                <span class="status online"></span>
+                                <span class="name">Maria Santos</span>
+                                <span class="time">Online</span>
+                            </div>
+                            <div class="student-item">
+                                <span class="status online"></span>
+                                <span class="name">John Reyes</span>
+                                <span class="time">8 min ago</span>
+                            </div>
+                            <div class="student-item">
+                                <span class="status"></span>
+                                <span class="name">Aiza Tan</span>
+                                <span class="time">1h ago</span>
+                            </div>
+                        </div>
+                    </aside>
+                    {% endif %}
+                {% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    {% block scripts %}
+    <script src="/static/js/teacher-dashboard.js"></script>
+    {% endblock %}
+</body>
+</html>

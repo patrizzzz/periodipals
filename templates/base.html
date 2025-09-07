@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PeriodiPal{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="layout-wrapper">
+        <!-- Sidebar -->
+        {% block sidebar %}
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">🌈</span>
+                <span class="logo-text">PeriodiPal</span>
+            </div>
+
+            <nav class="nav-menu">
+                {% block nav_menu %}
+                <a href="/menu" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                {% endblock %}
+            </nav>
+        </aside>
+        {% endblock %}
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Navigation -->
+            <header class="top-nav">
+                <div class="nav-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">{% block page_title %}PeriodiPal{% endblock %}</h1>
+                </div>
+
+                <div class="nav-right">
+                    {% if session.uid %}
+                    <div class="profile-menu">
+                        <button class="profile-btn" id="profileBtn">
+                            <i class="fas fa-user"></i>
+                            <span class="profile-name">{{ session.email }}</span>
+                        </button>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <a href="/logout">Sign Out</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <div class="content-area">
+                {% block content %}{% endblock %}
+            </div>
+
+            <!-- Footer -->
+            <footer class="app-footer">
+                <div class="footer-content">
+                    <p>&copy; 2024 PeriodiPal. All rights reserved.</p>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Common Scripts -->
+    <script src="/static/js/app.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

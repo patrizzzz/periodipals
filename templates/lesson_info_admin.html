@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lesson Info Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8f9fa; margin: 0; padding: 0; }
+        .container { max-width: 900px; margin: 40px auto; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.07); padding: 30px; }
+        h1 { font-size: 2rem; margin-bottom: 1.5rem; }
+        form { margin-bottom: 2rem; }
+        input, textarea { width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #e2e8f0; }
+        button { padding: 8px 18px; border-radius: 6px; border: none; background: #4299e1; color: white; font-weight: 600; cursor: pointer; }
+        button.delete { background: #e53e3e; margin-left: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+        th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+        th { background: #f1f5f9; }
+        .actions { white-space: nowrap; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Lesson Info Admin</h1>
+    <form method="POST">
+        <input name="module_name" placeholder="Module Name (e.g. reproductive)" required>
+        <input name="organ_name" placeholder="Organ Name (e.g. testes)" required>
+        <input name="title" placeholder="Title" required>
+        <input name="icon_class" placeholder="Icon Class (e.g. fa-egg)">
+        <textarea name="description" placeholder="Description" required></textarea>
+        <textarea name="key_points" placeholder="Key Points (one per line)" required></textarea>
+        <button type="submit">Add Lesson Info</button>
+    </form>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Module</th>
+            <th>Organ</th>
+            <th>Title</th>
+            <th>Icon</th>
+            <th>Description</th>
+            <th>Key Points</th>
+            <th>Actions</th>
+        </tr>
+        {% for lesson in lessons %}
+        <tr>
+            <form method="POST" action="/admin/lesson_info/edit/{{ lesson[0] }}">
+            <td>{{ lesson[0] }}</td>
+            <td><input name="module_name" value="{{ lesson[1] }}" required></td>
+            <td><input name="organ_name" value="{{ lesson[2] }}" required></td>
+            <td><input name="title" value="{{ lesson[3] }}" required></td>
+            <td><input name="icon_class" value="{{ lesson[6] }}"></td>
+            <td><textarea name="description" required>{{ lesson[4] }}</textarea></td>
+            <td><textarea name="key_points" required>{{ lesson[5] }}</textarea></td>
+            <td class="actions">
+                <button type="submit">Save</button>
+                <form method="POST" action="/admin/lesson_info/delete/{{ lesson[0] }}" style="display:inline;">
+                    <button type="submit" class="delete">Delete</button>
+                </form>
+            </td>
+            </form>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+</body>
+</html>

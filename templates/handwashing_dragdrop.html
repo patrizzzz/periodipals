@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Handwashing Steps: Drag & Drop Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css">
+    <link rel="stylesheet" href="/static/css/handwashing_dragdrop.css">
+    <style>
+        /* ...existing styles... */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 9998;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .mascot-container {
+            transition: all 0.3s ease-out;
+            position: fixed !important;
+            will-change: transform, left, top;
+        }
+        .mascot-highlight {
+            position: relative;
+            z-index: 9999;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.4);
+            border-radius: 4px;
+        }
+        .mascot-sprite {
+            background-position-x: 0%;
+            transition: background-position-x 0.3s ease-out;
+        }
+        .mascot-sprite.happy { background-position-x: 0%; }
+        .mascot-sprite.pointing { background-position-x: 33.33%; }
+        .mascot-sprite.explaining { background-position-x: 66.66%; }
+        .mascot-sprite.idle { background-position-x: 100%; }
+    </style>
+</head>
+<body>
+    <div class="activity-container">
+        <header class="activity-header">
+            <h1>🧼 Handwashing Steps Game</h1>
+            <p class="activity-description">Drag the steps into the correct order to learn proper handwashing!</p>
+            <button onclick="startHandwashingTutorial()" style="margin-top:15px; background:linear-gradient(135deg,#4facfe,#00f2fe);color:white;border:none;padding:10px 22px;border-radius:20px;font-size:1em;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08);">❓ How to Play</button>
+        </header>
+        
+        <main class="activity-content">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="step-counter" id="stepCounter">
+                Steps placed: <span id="stepCount">0</span> / 5
+            </div>
+            
+            <div class="game-section">
+                <h3 class="section-title">📋 Available Steps</h3>
+                <div class="drag-container" id="dragContainer">
+                    <div class="drag-item" draggable="true" data-step="0">🧴 Apply Soap</div>
+                    <div class="drag-item" draggable="true" data-step="1">💧 Wet Hands</div>
+                    <div class="drag-item" draggable="true" data-step="2">🤲 Scrub All Surfaces</div>
+                    <div class="drag-item" draggable="true" data-step="3">🚿 Rinse Hands</div>
+                    <div class="drag-item" draggable="true" data-step="4">🧻 Dry Hands</div>
+                </div>
+            </div>
+            
+            <div class="game-section">
+                <h3 class="section-title">🎯 Correct Order</h3>
+                <div class="drop-zone" id="dropZone">
+                    <h4>Drop the steps here in the correct order:</h4>
+                    <div class="zone-items" id="zoneItems"></div>
+                </div>
+            </div>
+            
+            <div class="drag-feedback" id="dragFeedback" style="display: none;"></div>
+
+            <button class="submit-btn" id="submitBtn" style="display: none;">
+                ✅ Check My Order
+            </button>
+            <button class="reset-btn" id="resetBtn" style="display: none;">
+                🔄 Reset Game
+            </button>
+        </main>
+        
+        <footer class="activity-footer">
+            <div class="footer-content">
+                <a href="/mini-games" class="nav-btn">
+                    <span class="nav-icon">←</span>
+                    <span class="nav-text">Back to Mini Games</span>
+                </a>
+                <div class="footer-info">
+                    <p>🧼 Stay healthy, wash your hands regularly!</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <div class="overlay" id="tourOverlay"></div>
+
+    <div class="mascot-container" id="mascotOnboarding" style="position: fixed; bottom: 24px; left: 24px; z-index: 10000; display: flex; flex-direction: column; align-items: flex-start; transition: all 0.3s ease-out; pointer-events: all; max-width: 400px; transform: none;">
+        <div class="speech-bubble" id="mascotSpeech" style="background: white; padding: 18px 16px; border-radius: 30px; box-shadow: 0 4px 16px rgba(0,0,0,0.10); margin-bottom: 12px; max-width: 320px; font-size: 1.1rem; font-family: 'Nunito', Arial, sans-serif; font-weight: 600; line-height: 1.4; text-align: left;"></div>
+        <div class="mascot-sprite happy" id="mascotSprite" style="width: 120px; height: 120px; background: url('/static/img/teacher.png') no-repeat; background-size: 400% 100%; image-rendering: pixelated; transition: transform 0.3s ease-out; cursor: pointer;"></div>
+        <div class="mascot-tour-buttons" style="margin-top: 8px; display: flex; gap: 8px; width: 100%;">
+            <button id="mascotNext" style="padding: 6px 16px; border-radius: 6px; border: none; background: #007bff; color: white; font-weight: 600; cursor: pointer;">Next</button>
+            <button id="mascotSkip" style="padding: 6px 16px; border-radius: 6px; border: none; background: #e9ecef; color: #495057; font-weight: 600; cursor: pointer;">Skip</button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/intro.js/minified/intro.min.js"></script>
+    <script src="/static/js/introH.js"></script>
+    <script src="/static/js/handwashing_dragdrop.js"></script>
+    <script>
+        // Mascot onboarding tour variables and steps
+        const mascotSprite = document.getElementById('mascotSprite');
+        const mascotSpeech = document.getElementById('mascotSpeech');
+        const mascotNext = document.getElementById('mascotNext');
+        const mascotSkip = document.getElementById('mascotSkip');
+        const mascotContainer = document.getElementById('mascotOnboarding');
+        const overlay = document.getElementById('tourOverlay');
+        let currentStep = 0;
+
+        // Tour steps
+        const steps = [
+            { message: 'Welcome! Let me show you how to play the Handwashing Steps Game. 🧼' },
+            { message: 'This is your progress bar. It fills up as you place steps in order! 📊', highlight: '.progress-bar' },
+            { message: 'Here you can see how many steps you have placed. Try to get all 5! 🔢', highlight: '.step-counter' },
+            { message: 'Drag these steps to the drop zone below. Each step is important! 👆', highlight: '.drag-container' },
+            { message: 'Drop the steps here in the correct order. This is where you build your answer! 🎯', highlight: '.drop-zone' },
+            { message: 'When you finish, click this button to check your order! ✅', highlight: '#submitBtn' },
+            { message: 'If you want to try again, use the reset button! 🔄', highlight: '#resetBtn' },
+            { message: 'Ready? Let’s start! You can always click me for help.' }
+        ];
+
+        // Helper functions
+        function setMascotState(state, message) {
+            mascotSprite.className = 'mascot-sprite ' + state;
+            if (message) mascotSpeech.textContent = message;
+        }
+
+        function highlightElement(selector) {
+            document.querySelectorAll('.mascot-highlight').forEach(e => e.classList.remove('mascot-highlight'));
+            if (selector) {
+                const el = document.querySelector(selector);
+                if (el) el.classList.add('mascot-highlight');
+            }
+        }
+
+        function getElementPosition(element) {
+            const rect = element.getBoundingClientRect();
+            return {
+                left: rect.left + window.scrollX,
+                top: rect.top + window.scrollY,
+                width: rect.width,
+                height: rect.height
+            };
+        }
+
+        function positionMascotNear(element) {
+            if (!element) return;
+            const pos = getElementPosition(element);
+            const mascot = document.getElementById('mascotOnboarding');
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const mascotWidth = 400; // Max width of mascot container
+            const mascotHeight = 250; // Approximate height of mascot + speech bubble
+            
+            // Calculate initial position (prefer right side)
+            let left = pos.left + pos.width + 20;
+            let top = pos.top + (pos.height / 2) - (mascotHeight / 2);
+            
+            // Keep within horizontal bounds
+            if (left + mascotWidth > windowWidth - 20) {
+                left = Math.max(20, pos.left - mascotWidth - 20);
+            }
+            
+            // Keep within vertical bounds
+            if (top < 20) {
+                top = 20;
+            } else if (top + mascotHeight > windowHeight - 20) {
+                top = windowHeight - mascotHeight - 20;
+            }
+            
+            // Set position with fixed positioning instead of transform
+            mascot.style.position = 'fixed';
+            mascot.style.left = left + 'px';
+            mascot.style.top = top + 'px';
+            mascot.style.transform = 'none';
+        }
+
+        function showStep(idx) {
+            const step = steps[idx];
+            setMascotState(idx === 0 ? 'happy' : 'explaining', step.message);
+            
+            document.querySelectorAll('.mascot-highlight').forEach(e => e.classList.remove('mascot-highlight'));
+            
+            if (step.highlight) {
+                const el = document.querySelector(step.highlight);
+                if (el) {
+                    el.classList.add('mascot-highlight');
+                    positionMascotNear(el);
+                    overlay.style.opacity = '1';
+                }
+            } else {
+                mascotContainer.style.transform = '';
+                overlay.style.opacity = '0';
+            }
+            
+            mascotNext.textContent = idx === steps.length - 1 ? 'Done' : 'Next';
+        }
+
+        // Event listeners
+        mascotNext.addEventListener('click', () => {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                showStep(currentStep);
+            } else {
+                document.querySelectorAll('.mascot-highlight').forEach(e => e.classList.remove('mascot-highlight'));
+                mascotContainer.style.transform = '';
+                overlay.style.opacity = '0';
+                mascotContainer.style.display = 'none';
+            }
+        });
+
+        mascotSkip.addEventListener('click', () => {
+            document.querySelectorAll('.mascot-highlight').forEach(e => e.classList.remove('mascot-highlight'));
+            mascotContainer.style.transform = '';
+            overlay.style.opacity = '0';
+            mascotContainer.style.display = 'none';
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (currentStep < steps.length && steps[currentStep].highlight) {
+                const el = document.querySelector(steps[currentStep].highlight);
+                if (el) positionMascotNear(el);
+            }
+        });
+
+        // Start tour when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => showStep(0), 500);
+        });
+    </script>
+</body>
+</html>

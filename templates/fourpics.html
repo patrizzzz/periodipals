@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4 Pics 1 Word - Menstrual Hygiene Management</title>
+    <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css">
+    <link rel="stylesheet" href="/static/css/fourpics.css">
+    <style>
+        .tour-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                circle at 50% 50%,
+                rgba(0, 0, 0, 0.5) 0%,
+                rgba(0, 0, 0, 0.8) 100%
+            );
+            z-index: 9998;
+            display: none;
+            transition: all 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="tour-overlay" id="tourOverlay"></div>
+        <h1>4 Pics 1 Word</h1>
+        <p class="subtitle">Menstrual Hygiene Management Edition</p>
+        
+        <div class="score-container">
+            <span>🏆 Score: <span id="score">0</span></span>
+            <span style="margin: 0 15px;">•</span>
+            <span>🎯 Round: <span id="round">1</span></span>
+        </div>
+        
+        <div class="images-grid">
+            <div class="image-container">
+                <div class="loading" id="loading1">Loading image...</div>
+                <img id="img1" style="display: none;" alt="Image 1">
+            </div>
+            <div class="image-container">
+                <div class="loading" id="loading2">Loading image...</div>
+                <img id="img2" style="display: none;" alt="Image 2">
+            </div>
+            <div class="image-container">
+                <div class="loading" id="loading3">Loading image...</div>
+                <img id="img3" style="display: none;" alt="Image 3">
+            </div>
+            <div class="image-container">
+                <div class="loading" id="loading4">Loading image...</div>
+                <img id="img4" style="display: none;" alt="Image 4">
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="answer-boxes" id="answerBoxes"></div>
+            
+            <div class="letter-tiles" id="letterTiles"></div>
+
+            <div class="buttons">
+                <button class="hint-btn" onclick="showHint()">💡 Get Hint</button>
+                <button class="new-game-btn" onclick="clearAnswer()">🔄 Clear</button>
+                <button class="new-game-btn" onclick="newGame()">🎮 New Game</button>
+            </div>
+
+            <div id="message"></div>
+        </div>
+        <footer class="activity-footer">
+            <div class="footer-content">
+                <a href="/mini-games" class="nav-btn">
+                    <span class="nav-icon">←</span>
+                    <span class="nav-text">Back to Mini Games</span>
+                </a>
+                <div class="footer-info">
+                    <p>🧼 Every touch of care leaves a mark of love.</p>
+                </div>
+            </div>
+        </footer>
+
+        <div class="mascot-container" id="mascotOnboarding" style="position: fixed; bottom: 24px; left: 24px; z-index: 10000; display: flex; flex-direction: column; align-items: flex-start; transition: all 0.5s ease-out; pointer-events: all; max-width: 400px;">
+            <div class="speech-bubble" id="mascotSpeech" style="background: white; padding: 18px 16px; border-radius: 30px; box-shadow: 0 4px 16px rgba(0,0,0,0.10); margin-bottom: 12px; max-width: 320px; font-size: 1.1rem; font-family: 'Nunito', Arial, sans-serif; font-weight: 600; line-height: 1.4; text-align: left;"></div>
+            <div class="mascot-sprite happy" id="mascotSprite" style="width: 120px; height: 120px; background: url('/static/img/teacher.png') no-repeat; background-size: 400% 100%; image-rendering: pixelated; transition: transform 0.3s ease-out; cursor: pointer;"></div>
+            <div class="mascot-tour-buttons" style="margin-top: 8px; display: flex; gap: 8px; width: 100%;">
+                <button id="mascotNext" style="padding: 6px 16px; border-radius: 6px; border: none; background: #007bff; color: white; font-weight: 600; cursor: pointer;">Next</button>
+                <button id="mascotSkip" style="padding: 6px 16px; border-radius: 6px; border: none; background: #e9ecef; color: #495057; font-weight: 600; cursor: pointer;">Skip</button>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/intro.js/minified/intro.min.js"></script>
+    <script src="/static/js/fourpics.js"></script>
+    <script src="/static/js/introq.js"></script>
+    <script>
+        // Mascot onboarding tour logic
+        const mascotSprite = document.getElementById('mascotSprite');
+        const mascotSpeech = document.getElementById('mascotSpeech');
+        const mascotNext = document.getElementById('mascotNext');
+        const mascotSkip = document.getElementById('mascotSkip');
+        const steps = [
+            {
+                element: '.score-container',
+                state: 'happy',
+                message: 'This is your score! Try to get as many points as you can by solving puzzles. 🏆'
+            },
+            {
+                element: '#round',
+                state: 'explaining',
+                message: 'This shows your current round. Each round brings a new challenge! 🎯'
+            },
+            {
+                element: '.images-grid',
+                state: 'pointing',
+                message: 'Look at these four pictures. They all relate to one word. Can you guess it? 🖼️'
+            },
+            {
+                element: '#answerBoxes',
+                state: 'pointing',
+                message: 'Fill in the boxes with the correct letters to solve the puzzle! ✏️'
+            },
+            {
+                element: '#letterTiles',
+                state: 'pointing',
+                message: 'Click the letter tiles to fill in your answer! 🔠'
+            },
+            {
+                element: '.hint-btn',
+                state: 'explaining',
+                message: 'Need help? Click here for a hint to help you solve the puzzle! 💡'
+            },
+            {
+                element: '.new-game-btn[onclick*="clearAnswer"]',
+                state: 'pointing',
+                message: 'Click here to clear your answer and try again! 🔄'
+            },
+            {
+                element: '.new-game-btn[onclick*="newGame"]',
+                state: 'happy',
+                message: 'Start a new round and challenge yourself with a fresh puzzle! 🎮'
+            }
+        ];
+        let currentStep = 0;
+        function setMascotState(state, message) {
+            mascotSprite.classList.remove('happy', 'pointing', 'explaining', 'idle');
+            mascotSprite.classList.add(state);
+            switch(state) {
+                case 'happy': mascotSprite.style.backgroundPosition = '0% 0'; break;
+                case 'pointing': mascotSprite.style.backgroundPosition = '33.33% 0'; break;
+                case 'explaining': mascotSprite.style.backgroundPosition = '66.66% 0'; break;
+                case 'idle': mascotSprite.style.backgroundPosition = '100% 0'; break;
+                default: mascotSprite.style.backgroundPosition = '0% 0'; break;
+            }
+            if (message && mascotSpeech) mascotSpeech.textContent = message;
+        }
+        function highlightElement(selector) {
+            document.querySelectorAll('.mascot-highlight').forEach(e => e.classList.remove('mascot-highlight'));
+            const el = document.querySelector(selector);
+            if (el) el.classList.add('mascot-highlight');
+        }
+        function clearHighlight() {
+            document.querySelectorAll('.mascot-highlight').forEach(e => e.classList.remove('mascot-highlight'));
+        }
+        function moveMascotTo(element) {
+            const mascotContainer = document.getElementById('mascotOnboarding');
+            const elementRect = element.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const viewportWidth = window.innerWidth;
+            const containerWidth = 320; // Width of mascot container with speech bubble
+            const containerHeight = 200; // Approximate height of mascot + speech bubble
+            
+            // Calculate initial position near the element
+            let left = Math.min(elementRect.right + 20, viewportWidth - containerWidth - 20);
+            let bottom = viewportHeight - elementRect.top - (containerHeight / 2);
+            
+            // Ensure mascot stays within viewport bounds
+            // Check horizontal bounds
+            if (left + containerWidth > viewportWidth - 20) {
+                left = Math.max(20, elementRect.left - containerWidth - 20);
+            }
+            left = Math.max(20, left);
+            
+            // Check vertical bounds
+            bottom = Math.max(20, Math.min(bottom, viewportHeight - containerHeight - 20));
+            
+            // Move mascot
+            mascotContainer.style.left = `${left}px`;
+            mascotContainer.style.bottom = `${bottom}px`;
+            
+            // Flip mascot if on right side
+            const mascotSprite = document.getElementById('mascotSprite');
+            mascotSprite.style.transform = left > elementRect.left ? 'scaleX(-1)' : 'scaleX(1)';
+        }
+
+        function updateOverlayForHighlight(element) {
+            const overlay = document.getElementById('tourOverlay');
+            if (!overlay || !element) return;
+            const rect = element.getBoundingClientRect();
+            const centerX = rect.left + (rect.width / 2);
+            const centerY = rect.top + (rect.height / 2);
+            overlay.style.display = 'block';
+            overlay.style.background = `
+                radial-gradient(
+                    circle at ${centerX}px ${centerY}px,
+                    rgba(0, 0, 0, 0.5) 30px,
+                    rgba(0, 0, 0, 0.8) 100px
+                )`;
+        }
+        function clearOverlay() {
+            const overlay = document.getElementById('tourOverlay');
+            if (overlay) overlay.style.display = 'none';
+        }
+        function showStep(idx) {
+            if (idx < 0 || idx >= steps.length) return;
+            currentStep = idx;
+            const element = document.querySelector(steps[idx].element);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => {
+                    moveMascotTo(element);
+                    setMascotState(steps[idx].state, steps[idx].message);
+                    highlightElement(steps[idx].element);
+                    updateOverlayForHighlight(element);
+                }, 500);
+            }
+            mascotNext.textContent = idx === steps.length - 1 ? 'Start Game' : 'Next';
+        }
+        const idleMessages = [
+            "Ready to solve some puzzles? You can do it! 🎯",
+            "Remember, every picture tells a story! 🖼️",
+            "Need a hint? Just ask me! 💡",
+            "You're doing great! Keep going! ⭐",
+            "Take your time and look carefully at each image! 👀"
+        ];
+
+        function setRandomIdleMessage() {
+            const randomMessage = idleMessages[Math.floor(Math.random() * idleMessages.length)];
+            setMascotState('idle', randomMessage);
+        }
+
+        mascotNext.addEventListener('click', function() {
+            if (currentStep === steps.length - 1) {
+                clearHighlight();
+                clearOverlay();
+                const mascotContainer = document.getElementById('mascotOnboarding');
+                mascotContainer.style.left = '24px';
+                mascotContainer.style.bottom = '24px';
+                const mascotSprite = document.getElementById('mascotSprite');
+                mascotSprite.style.transform = 'scaleX(1)';
+                document.querySelector('.mascot-tour-buttons').style.display = 'none';
+                setRandomIdleMessage();
+                setInterval(setRandomIdleMessage, 10000); // Change message every 10 seconds
+            } else {
+                showStep(currentStep + 1);
+            }
+        });
+        mascotSkip.addEventListener('click', function() {
+            clearHighlight();
+            clearOverlay();
+            document.getElementById('mascotOnboarding').style.display = 'none';
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add highlight style
+            const style = document.createElement('style');
+            style.textContent = `
+                .mascot-highlight { 
+                    box-shadow: 0 0 0 4px rgba(255, 224, 102, 0.8), 0 0 0 8px rgba(255, 224, 102, 0.4);
+                    border-radius: 8px;
+                    position: relative;
+                    z-index: 10001;
+                    transition: all 0.3s ease-out;
+                    animation: highlight-pulse 2s infinite;
+                }
+                @keyframes highlight-pulse {
+                    0% { box-shadow: 0 0 0 4px rgba(255, 224, 102, 0.8), 0 0 0 8px rgba(255, 224, 102, 0.4); }
+                    50% { box-shadow: 0 0 0 8px rgba(255, 224, 102, 0.8), 0 0 0 16px rgba(255, 224, 102, 0.4); }
+                    100% { box-shadow: 0 0 0 4px rgba(255, 224, 102, 0.8), 0 0 0 8px rgba(255, 224, 102, 0.4); }
+                }
+            `;
+            document.head.appendChild(style);
+            showStep(0);
+        });
+    </script>
+</body>
+</html>

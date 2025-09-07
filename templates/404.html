@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Page Not Found - PeriodiPal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .error-container {
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .error-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+        .error-title {
+            font-size: 2.5rem;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        .error-message {
+            color: #718096;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+        .back-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #4299e1;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        .back-btn:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">🤔</div>
+        <h1 class="error-title">Oops! Page Not Found</h1>
+        <p class="error-message">
+            The page you're looking for doesn't exist or has been moved.
+            Let's get you back on track!
+        </p>
+        <a href="/menu" class="back-btn">Return to Menu</a>
+    </div>
+</body>
+</html>

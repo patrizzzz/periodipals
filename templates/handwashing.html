@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Handwashing Guide</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css">
+    <link rel="stylesheet" href="/static/css/handwashing.css">
+</head>
+<body>
+    <a href="/menu" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <div class="container">
+        <!-- Breadcrumbs -->
+        <div class="breadcrumbs">
+            <a href="/menu">Menu</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Handwashing Guide</span>
+        </div>
+
+        <header class="header">
+            <i class="fas fa-hand-holding-water water-icon"></i>
+            <h1 class="main-title">PREVENT ILLNESSES</h1>
+            <p class="subtitle">Master the art of proper handwashing</p>
+        </header>
+        
+        <div class="content">
+            <div class="steps-sidebar">
+                <h2 class="sidebar-title">
+                    <i class="fas fa-list-check"></i>
+                    Handwashing Steps
+                </h2>
+                
+                <div class="step-item active" data-step="0">
+                    <div class="step-number">1</div>
+                    <div class="step-info">
+                        <h3>Wet</h3>
+                        <p>Clean running water</p>
+                    </div>
+                </div>
+                
+                <div class="step-item" data-step="1">
+                    <div class="step-number">2</div>
+                    <div class="step-info">
+                        <h3>Apply Soap</h3>
+                        <p>Lather thoroughly</p>
+                    </div>
+                </div>
+                
+                <div class="step-item" data-step="2">
+                    <div class="step-number">3</div>
+                    <div class="step-info">
+                        <h3>Scrub</h3>
+                        <p>All surfaces for 20 seconds</p>
+                    </div>
+                </div>
+                
+                <div class="step-item" data-step="3">
+                    <div class="step-number">4</div>
+                    <div class="step-info">
+                        <h3>Rinse</h3>
+                        <p>Thoroughly with water</p>
+                    </div>
+                </div>
+                
+                <div class="step-item" data-step="4">
+                    <div class="step-number">5</div>
+                    <div class="step-info">
+                        <h3>Dry</h3>
+                        <p>Clean towel or air dry</p>
+                    </div>
+                </div>
+                
+                <div class="tips-section">
+                    <h3 class="tips-title">
+                        <i class="fas fa-lightbulb"></i>
+                        Key Tips
+                    </h3>
+                    <div class="tip-item">
+                        <i class="fas fa-clock tip-icon"></i>
+                        <p>Scrub for at least 20 seconds - sing "Happy Birthday" twice!</p>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-hand-paper tip-icon"></i>
+                        <p>Don't forget between fingers, thumbs, and under nails.</p>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-repeat tip-icon"></i>
+                        <p>Wash before eating, after restroom, and when visibly dirty.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="main-display">
+                <div class="bubbles-container" id="bubbles"></div>
+                
+                <div class="step-visual">
+                    <i class="fas fa-faucet step-icon pulse" id="stepIcon"></i>
+                </div>
+                
+                <h2 class="step-title" id="stepTitle">Wet Your Hands</h2>
+                <p class="step-description" id="stepDescription">Turn on the tap and wet your hands with clean, running water. The temperature doesn't matter - use what's comfortable.</p>
+                
+                <div class="timer-display">
+                    <div class="timer-circle" id="timerCircle">20s</div>
+                    <span>Recommended time for this step</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-secondary" id="prevBtn" disabled>
+                <i class="fas fa-arrow-left"></i>
+                Previous
+            </button>
+            
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 20%"></div>
+                </div>
+                <div class="progress-text">
+                    Step <span id="currentStep">1</span> of 5
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" id="nextBtn">
+                Next
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div class="auto-advance hidden" id="autoAdvance">
+        Auto-advancing in <span id="autoTimer">5</span>s
+    </div>
+    <style>
+        .post-quiz-card {
+            max-width: 700px;
+            margin: 50px auto;
+            background: linear-gradient(135deg, #fdfbfb, #ebedee);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            padding: 40px 30px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .post-quiz-title {
+            font-size: 2rem;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .post-quiz-desc {
+            font-size: 1.1rem;
+            color: #4a5568;
+            margin-bottom: 30px;
+        }
+
+        .quiz-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .quiz-btn,
+        .skip-btn {
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            color: white;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            box-shadow: 0 8px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .quiz-btn:hover,
+        .skip-btn:hover {
+            background: linear-gradient(135deg, #6b46c1, #4c51bf);
+            transform: translateY(-2px);
+        }
+
+        .skip-btn {
+            background: linear-gradient(135deg, #a0aec0, #718096);
+        }
+
+        .skip-btn:hover {
+            background: linear-gradient(135deg, #718096, #4a5568);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+    {% if post_quiz_available %}
+    <div class="post-quiz-card">
+        <h2 class="post-quiz-title">🎓 Test Your Knowledge</h2>
+        <p class="post-quiz-desc">Take the post-quiz to see what you've learned from this module!</p>
+
+        <div class="quiz-options">
+            <a href="/quiz/3/post" class="quiz-btn" type="button">Take Post-Quiz</a>
+            <a href="/menu" class="skip-btn" type="button">Skip & Return to Menu</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <script>
+        document.querySelector('.quiz-btn').addEventListener('click', function () {
+            localStorage.setItem('returnToModule', '{{ module_id }}');
+        });
+    </script>
+
+    <script src="/static/js/handwashing.js"></script>
+    <script src="https://unpkg.com/intro.js/minified/intro.min.js"></script>
+    <script type="module" src="/static/js/chatbot.js"></script>
+    <script type="module" src="/static/js/handwashing-intro.js"></script>
+</body>
+</html>

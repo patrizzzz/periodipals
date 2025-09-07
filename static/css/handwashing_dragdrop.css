@@ -1,0 +1,611 @@
+* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .activity-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 900px;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .activity-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .activity-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 20%, transparent 20%);
+            background-size: 30px 30px;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateX(-30px) translateY(-30px); }
+            100% { transform: translateX(0px) translateY(0px); }
+        }
+
+        .activity-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .activity-description {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .activity-content {
+            padding: 40px;
+            background: #f8f9fa;
+        }
+
+        .game-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .drag-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .drag-item {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #2c3e50;
+            padding: 20px;
+            border-radius: 15px;
+            cursor: grab;
+            user-select: none;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .drag-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .drag-item:hover::before {
+            left: 100%;
+        }
+
+        .drag-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .drag-item:active {
+            cursor: grabbing;
+            transform: scale(0.95);
+        }
+
+        .drag-item.dragging {
+            opacity: 0.7;
+            transform: rotate(5deg);
+        }
+
+        .drag-item.in-zone {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            cursor: default;
+        }
+
+        .drop-zone {
+            background: white;
+            border: 3px dashed #bdc3c7;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            min-height: 200px;
+            position: relative;
+        }
+
+        .drop-zone.highlight {
+            border-color: #3498db;
+            background: #e8f4f8;
+            transform: scale(1.02);
+        }
+
+        .drop-zone h4 {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .zone-items {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 120px;
+            align-items: center;
+        }
+
+        .zone-items .drag-item {
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .zone-items .drag-item::after {
+            content: attr(data-order);
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.8);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: block;
+            margin: 30px auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .drag-feedback {
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: 600;
+            animation: bounceIn 0.5s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .correct-feedback {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: 3px solid #27ae60;
+        }
+
+        .incorrect-feedback {
+            background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+            color: white;
+            border: 3px solid #e74c3c;
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #2c3e50;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 15px;
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-bar {
+            background: #ecf0f1;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .step-counter {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .activity-footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 25px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .activity-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4facfe, #00f2fe, #4facfe);
+            background-size: 200% 100%;
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .nav-btn:active {
+            transform: translateY(0);
+        }
+
+        .nav-icon {
+            font-size: 1.2em;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-btn:hover .nav-icon {
+            transform: translateX(-5px);
+        }
+
+        .nav-text {
+            font-size: 1em;
+        }
+
+        .footer-info {
+            text-align: right;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .activity-container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .activity-content {
+                padding: 20px;
+            }
+            
+            .drag-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .activity-header h1 {
+                font-size: 2em;
+            }
+            
+            .drag-item {
+                padding: 15px;
+                font-size: 1em;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .footer-info {
+                text-align: center;
+            }
+            
+            .nav-btn {
+                order: 2;
+            }
+            
+            .footer-info {
+                order: 1;
+            }
+            /* handwashing_dragdrop.css */
+
+            /* GENERAL LAYOUT */
+            body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            margin: 0;
+            padding: 0;
+            }
+            .activity-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: #ffffffdd;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+            }
+            .activity-header {
+            text-align: center;
+            padding: 1.5rem;
+            background: #4facfe;
+            color: white;
+            }
+            .activity-header h1 {
+            margin: 0 0 0.5rem;
+            font-size: 2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            }
+            .activity-description {
+            font-size: 1.1rem;
+            }
+
+            /* DRAG ITEMS */
+            .drag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            padding: 1rem;
+            }
+            .drag-item {
+            background: #ffeb3b;
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+            cursor: grab;
+            font-size: 1rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s ease;
+            }
+            .drag-item:active {
+            transform: scale(1.05);
+            cursor: grabbing;
+            }
+
+            /* DROP ZONE */
+            .drop-zone {
+            background: #e0f7fa;
+            border: 2px dashed #00acc1;
+            border-radius: 12px;
+            padding: 1rem;
+            min-height: 120px;
+            margin: 1rem;
+            }
+            .zone-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            }
+
+            /* BUTTONS */
+            .submit-btn, .reset-btn {
+            display: block;
+            margin: 1rem auto;
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            border: none;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            font-size: 1.1rem;
+            border-radius: 999px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            }
+            .submit-btn:hover, .reset-btn:hover {
+            transform: translateY(-2px);
+            }
+
+            /* PROGRESS BAR */
+            .progress-bar {
+            width: 90%;
+            height: 16px;
+            background: #ddd;
+            border-radius: 8px;
+            margin: 1rem auto;
+            overflow: hidden;
+            }
+            .progress-fill {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(135deg, #ff8a65, #ffb74d);
+            transition: width 0.3s ease;
+            }
+
+            /* STEP COUNTER */
+            .step-counter {
+            text-align: center;
+            font-size: 1.1rem;
+            }
+
+            /* FOOTER */
+            .activity-footer {
+            background: #4facfe;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            }
+
+            /* INTRO.JS CUSTOMIZATION */
+            .customTooltip {
+            background: #fffbe6 !important;
+            color: #333 !important;
+            font-size: 1rem !important;
+            border: 2px solid #ffb74d !important;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1) !important;
+            border-radius: 12px !important;
+            }
+            .customTooltip .introjs-tooltiptext {
+            line-height: 1.4;
+            }
+            .customTooltip .introjs-buttons .introjs-nextbutton,
+            .customTooltip .introjs-buttons .introjs-prevbutton,
+            .customTooltip .introjs-buttons .introjs-donebutton {
+            background: #ffb74d !important;
+            color: white !important;
+            border-radius: 8px !important;
+            padding: 0.4rem 0.8rem !important;
+            font-weight: bold !important;
+            }
+            .customHighlight {
+            box-shadow: 0 0 0 4px rgba(255,167,38,0.5) !important;
+            }
+            #closeTutorialBtn {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #ff5252;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+            }
+            .introjs-skipbutton { display: none !important; }
+
+        }

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ activity_title }} - Periodipal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/activities.css">
+    {% block extra_css %}{% endblock %}
+
+    <!-- Firebase Scripts -->
+    <script type="module" src="{{ url_for('static', filename='js/firebase-config.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/firebase-service.js') }}"></script>
+</head>
+<body>
+    <div class="activity-container">
+        <header class="activity-header">
+            <h1>{{ activity_title }}</h1>
+            <p class="activity-description">{{ activity_description }}</p>
+
+            <div class="activity-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Step 1 of {{ total_steps }}</div>
+            </div>
+        </header>
+
+        <main class="activity-content">
+            {% block activity_content %}{% endblock %}
+        </main>
+
+        <footer class="activity-footer">
+            <button class="nav-btn prev-btn" id="prevBtn">
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <button class="nav-btn next-btn" id="nextBtn">
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+            <button class="submit-btn" id="submitBtn" style="display: none;">
+                Complete Activity
+            </button>
+        </footer>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div class="feedback-modal" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Activity Complete!</h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <p id="modalMessage">You've successfully completed this activity!</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn" id="retryActivity">Try Again</button>
+                <button class="modal-btn primary" id="nextActivity">Continue Learning</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/activity_base.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

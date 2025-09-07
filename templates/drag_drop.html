@@ -1,0 +1,206 @@
+{% extends "activity_base.html" %}
+{% block extra_css %}
+<style>
+    .drag-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .drag-item {
+        background: #f7fafc;
+        border: 2px dashed #cbd5e0;
+        border-radius: 8px;
+        padding: 15px;
+        cursor: move;
+        user-select: none;
+    }
+
+    .drop-zone {
+        min-height: 150px;
+        border: 2px dashed #a0aec0;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 15px 0;
+        transition: background 0.2s;
+    }
+
+    .drop-zone.highlight {
+        background: #ebf8ff;
+        border-color: #4299e1;
+    }
+
+    .drag-item.in-zone {
+        background: #ebf8ff;
+        border-style: solid;
+        border-color: #90cdf4;
+    }
+
+    .drag-feedback {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        display: none;
+    }
+
+    .correct-feedback {
+        background: #f0fff4;
+        border-left: 4px solid #48bb78;
+    }
+
+    .incorrect-feedback {
+        background: #fff5f5;
+        border-left: 4px solid #f56565;
+    }
+</style>
+{% endblock %}
+
+{% block activity_content %}
+<div class="drag-drop-container">
+    <div class="drag-instructions">
+        <h3>Drag the items below to the correct drop zone</h3>
+        <p>{{ activity_description }}</p>
+    </div>
+
+    <div class="drag-container" id="dragContainer">
+        {% for item in drag_items %}
+        <div class="drag-item" draggable="true" data-id="{{ item.id }}" data-correct-zone="{{ item.correct_zone }}">
+            {{ item.text }}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="drop-zones">
+        {% for zone in drop_zones %}
+        <div class="drop-zone" data-zone-id="{{ zone.id }}">
+            <h4>{{ zone.title }}</h4>
+            <div class="zone-items" id="zone{{ zone.id }}"></div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="drag-feedback" id="dragFeedback"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class DragDropActivity extends ActivitySystem {
+    constructor() {
+        super();
+        this.draggedItem = null;
+        this.initDragDrop();
+    }
+
+    initDragDrop() {
+        this.dragItems = document.querySelectorAll('.drag-item');
+        this.dropZones = document.querySelectorAll('.drop-zone');
+        this.feedbackElement = document.getElementById('dragFeedback');
+
+        // Set up drag events for items
+        this.dragItems.forEach(item => {
+            item.addEventListener('dragstart', this.handleDragStart.bind(this));
+        });
+
+        // Set up drop events for zones
+        this.dropZones.forEach(zone => {
+            zone.addEventListener('dragover', this.handleDragOver.bind(this));
+            zone.addEventListener('dragleave', this.handleDragLeave.bind(this));
+            zone.addEventListener('drop', this.handleDrop.bind(this));
+        });
+    }
+
+    handleDragStart(e) {
+        this.draggedItem = e.target;
+        e.dataTransfer.setData('text/plain', e.target.dataset.id);
+        setTimeout(() => {
+            e.target.classList.add('dragging');
+        }, 0);
+    }
+
+    handleDragOver(e) {
+        e.preventDefault();
+        e.currentTarget.classList.add('highlight');
+    }
+
+    handleDragLeave(e) {
+        e.currentTarget.classList.remove('highlight');
+    }
+
+    handleDrop(e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('highlight');
+
+        const zoneId = e.currentTarget.dataset.zoneId;
+        const itemId = this.draggedItem.dataset.id;
+        const correctZone = this.draggedItem.dataset.correctZone;
+
+        // Check if drop is valid
+        if (zoneId === correctZone) {
+            this.handleCorrectDrop(e.currentTarget);
+        } else {
+            this.handleIncorrectDrop();
+        }
+    }
+
+    handleCorrectDrop(zone) {
+        const zoneItems = zone.querySelector('.zone-items');
+
+        // Clone the item (or move it)
+        const clonedItem = this.draggedItem.cloneNode(true);
+        clonedItem.classList.remove('dragging');
+        clonedItem.classList.add('in-zone');
+        clonedItem.setAttribute('draggable', 'false');
+
+        zoneItems.appendChild(clonedItem);
+        this.draggedItem.style.visibility = 'hidden';
+
+        this.showFeedback(true, "Correct! Well done!");
+        this.checkCompletion();
+    }
+
+    handleIncorrectDrop() {
+        this.showFeedback(false, "Not quite right. Try again!");
+        this.draggedItem.classList.remove('dragging');
+    }
+
+    showFeedback(isCorrect, message) {
+        this.feedbackElement.textContent = message;
+        this.feedbackElement.className = `drag-feedback ${isCorrect ? 'correct-feedback' : 'incorrect-feedback'}`;
+        this.feedbackElement.style.display = 'block';
+
+        setTimeout(() => {
+            this.feedbackElement.style.display = 'none';
+        }, 2000);
+    }
+
+    checkCompletion() {
+        const remainingItems = Array.from(this.dragItems).filter(item =>
+            item.style.visibility !== 'hidden'
+        );
+
+        if (remainingItems.length === 0) {
+            this.userResponses.completed = true;
+            this.userResponses.correctDrops = Array.from(this.dropZones).map(zone => {
+                return {
+                    zoneId: zone.dataset.zoneId,
+                    items: Array.from(zone.querySelectorAll('.in-zone')).map(item => item.dataset.id)
+                };
+            });
+
+            this.submitBtn.disabled = false;
+        }
+    }
+
+    validateActivity() {
+        return this.userResponses.completed || false;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    window.activitySystem = new DragDropActivity();
+});
+</script>
+{% endblock %}

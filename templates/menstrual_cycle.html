@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cycle Adventure!</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/menstrual_cycle.css">
+</head>
+<body>
+    <a href="/menu" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    
+    <div class="container">
+        <!-- Breadcrumbs -->
+        <div class="breadcrumbs">
+            <a href="/menu">Menu</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Menstrual Cycle</span>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-seedling"></i> Cycle Adventure!</h1>
+            <p>Discover the amazing journey of your menstrual cycle</p>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section">
+            <div class="progress-header">
+                <h2 class="progress-title"><i class="fas fa-chart-line"></i> Your Learning Progress</h2>
+                <span class="progress-counter"><span id="progressCount">0</span> / 4 Complete</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <!-- Cycle Phases -->
+            <div class="phases-container">
+                <div class="phase-card phase-1" data-phase="1">
+                    <div class="phase-header">
+                        <div class="phase-icon">
+                            <i class="fas fa-tint"></i>
+                        </div>
+                        <div class="phase-info">
+                            <h3>Menstruation</h3>
+                            <div class="phase-days">Days 1-7</div>
+                        </div>
+                    </div>
+                    
+                    <div class="phase-image">
+                         <img src="/static/img/cycle01.svg" alt="Phase Image" width="400" height="400">
+                    </div>
+                    
+                    <div class="phase-content">
+                        <p class="phase-description">
+                            Your body sheds the uterine lining that built up during the previous cycle. This is both the end and start of your cycle!
+                        </p>
+                        <div class="phase-tips">
+                            <h5><i class="fas fa-lightbulb"></i> Self-care tips:</h5>
+                            <p>Use pads or tampons, stay hydrated, and rest when needed. Light exercise can help with cramps.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phase-card phase-2" data-phase="2">
+                    <div class="phase-header">
+                        <div class="phase-icon">
+                            <i class="fas fa-seedling"></i>
+                        </div>
+                        <div class="phase-info">
+                            <h3>Follicular Phase</h3>
+                            <div class="phase-days">Days 1-13</div>
+                        </div>
+                    </div>
+                    
+                    <div class="phase-image">
+                        <img src="/static/img/cycle02.svg" alt="Phase Image" width="400" height="400">
+                    </div>
+                    
+                    <div class="phase-content">
+                        <p class="phase-description">
+                            Your body prepares for possible pregnancy by developing follicles in the ovaries. Estrogen levels begin to rise.
+                        </p>
+                        <div class="phase-tips">
+                            <h5><i class="fas fa-lightbulb"></i> Self-care tips:</h5>
+                            <p>This is a great time for physical activity as energy levels typically increase with rising estrogen.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phase-card phase-3" data-phase="3">
+                    <div class="phase-header">
+                        <div class="phase-icon">
+                            <i class="fas fa-egg"></i>
+                        </div>
+                        <div class="phase-info">
+                            <h3>Ovulation</h3>
+                            <div class="phase-days">Days 13-15</div>
+                        </div>
+                    </div>
+                    
+                    <div class="phase-image">
+                        <img src="/static/img/cycle03.svg" alt="Phase Image" width="400" height="400">
+                    </div>
+                    
+                    <div class="phase-content">
+                        <p class="phase-description">
+                            A mature egg is released from the ovary. This is the most fertile time when pregnancy is most likely to occur.
+                        </p>
+                        <div class="phase-tips">
+                            <h5><i class="fas fa-lightbulb"></i> Self-care tips:</h5>
+                            <p>Some people experience mild pain on one side during ovulation. This is normal and called mittelschmerz.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phase-card phase-4" data-phase="4">
+                    <div class="phase-header">
+                        <div class="phase-icon">
+                            <i class="fas fa-cloud"></i>
+                        </div>
+                        <div class="phase-info">
+                            <h3>Luteal Phase</h3>
+                            <div class="phase-days">Days 15-28</div>
+                        </div>
+                    </div>
+                    
+                    <div class="phase-image">
+                        <img src="/static/img/cycle04.svg" alt="Phase Image" width="400" height="400">
+                    </div>
+                    
+                    <div class="phase-content">
+                        <p class="phase-description">
+                            Your body prepares the uterus lining for a possible pregnancy. If pregnancy doesn't occur, the cycle starts again.
+                        </p>
+                        <div class="phase-tips">
+                            <h5><i class="fas fa-lightbulb"></i> Self-care tips:</h5>
+                            <p>PMS symptoms may occur during this phase. Practice self-care and maintain a healthy diet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tips Section -->
+        <div class="tips-section">
+            <h2 class="tips-title">
+                <i class="fas fa-heart"></i> Taking Care of Yourself
+            </h2>
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <h4><i class="fas fa-calendar-check"></i> Track Your Cycle</h4>
+                    <p>Use a calendar or app to note when your period starts. This helps you predict when to expect it next time.</p>
+                </div>
+                <div class="tip-card">
+                    <h4><i class="fas fa-first-aid"></i> Be Prepared</h4>
+                    <p>Keep period supplies in your backpack just in case. You never know when your period might start!</p>
+                </div>
+                <div class="tip-card">
+                    <h4><i class="fas fa-heart-pulse"></i> Listen to Your Body</h4>
+                    <p>It's normal to feel tired or have cramps. Rest when you need to, and use a warm compress if you have cramps.</p>
+                </div>
+                <div class="tip-card">
+                    <h4><i class="fas fa-user-friends"></i> Talk to Someone</h4>
+                    <p>If you have questions or concerns, talk to a trusted adult - a parent, school nurse, or doctor.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Post-Quiz Card -->
+        <div class="post-quiz-card" id="quizCard">
+            <h2 class="post-quiz-title">🎓 Test Your Knowledge</h2>
+            <p class="post-quiz-desc">Take the post-quiz to see what you've learned from this module!</p>
+            <div class="quiz-options">
+                <a href="/quiz/5/post" class="quiz-btn" id="takeQuizBtn">Take Post-Quiz</a>
+                <button class="skip-btn" id="skipBtn">Skip & Return to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mascot Container -->
+    <div class="mascot-container">
+        <div class="speech-bubble">Hey superstar! Ready to learn about your cycle? It's totally normal and happens to lots of people! Click any stage to discover something amazing about your body!</div>
+        <div class="mascot-sprite" data-bg-size="400% 100%"></div>
+    </div>
+    <script type="module" src="/static/js/mascot.js"></script>
+    <script src="/static/js/menstrual_cycle.js"></script>
+    <script type="module" src="/static/js/chatbot.js"></script>
+</body>
+</html>

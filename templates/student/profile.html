@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Student Profile - PeriodiPal{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <h1>Student Profile</h1>
+        <p>Manage your account and connections</p>
+    </div>
+
+    <div class="profile-sections">
+        <!-- Teacher Connection Section -->
+        <div class="profile-section">
+            <div class="section-header">
+                <h2><i class="fas fa-chalkboard-teacher"></i> Teacher Connection</h2>
+            </div>
+            <div class="connect-card">
+                <div id="currentTeacher" class="current-teacher" style="display:none;">
+                    Connected to: <span class="teacher-name"></span>
+                </div>
+                <div class="teacher-code-form">
+                    <h3>Connect with your teacher</h3>
+                    <p>Enter the code provided by your teacher to connect and access their resources.</p>
+                    <div class="input-group">
+                        <input type="text" id="teacherCodeInput" placeholder="Enter teacher code" maxlength="6">
+                        <button type="button" id="connectTeacherBtn">Connect</button>
+                    </div>
+                    <div id="teacherConnectError" class="error-message"></div>
+                    <div id="teacherConnectSuccess" class="success-message"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Settings Section -->
+        <div class="profile-section">
+            <div class="section-header">
+                <h2><i class="fas fa-user-cog"></i> Account Settings</h2>
+            </div>
+            <div class="settings-card">
+                <form id="studentProfileForm">
+                    <div class="setting-item">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                    </div>
+                    <div class="setting-item">
+                        <label for="middleInitial">Middle Initial</label>
+                        <input type="text" id="middleInitial" name="middleInitial" maxlength="1">
+                    </div>
+                    <div class="setting-item">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" name="lastName" required>
+                    </div>
+                    <div class="setting-item">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" name="age" required min="13" max="19">
+                    </div>
+                    <div class="setting-item">
+                        <button type="submit" class="save-btn">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/student-profile.js"></script>
+
+<style>
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.profile-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.profile-header h1 {
+    font-size: 2rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.profile-header p {
+    color: var(--text-secondary);
+}
+
+.profile-sections {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+.profile-section {
+    background: white;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.section-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.section-header h2 {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.connect-card, .settings-card {
+    padding: 1.5rem;
+}
+
+.current-teacher {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.teacher-code-form h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.teacher-code-form p {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.input-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.input-group button {
+    padding: 0.75rem 1.5rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.input-group button:hover {
+    background: var(--primary-dark);
+}
+
+.error-message {
+    color: var(--danger);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.success-message {
+    color: var(--success);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.setting-item {
+    margin-bottom: 1.5rem;
+}
+
+.setting-item:last-child {
+    margin-bottom: 0;
+}
+
+.setting-item label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.setting-item input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.save-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.save-btn:hover {
+    background: var(--primary-dark);
+}
+
+@media (min-width: 768px) {
+    .profile-sections {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+</style>
+{% endblock %}

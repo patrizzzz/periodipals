@@ -1,0 +1,829 @@
+{% extends "teacher/dashboard.html" %}
+
+{% block title %}Class Progress{% endblock %}
+{% block page_title %}Class Progress & Badges{% endblock %}
+
+{% block content %}
+<div class="content-section">
+  <!-- Enhanced Header with Stats -->
+  <div class="progress-header">
+    <div class="header-content">
+      <div class="header-info">
+        <h2><i class="fas fa-chart-line"></i> Class Progress Dashboard</h2>
+        <p>Monitor student achievements and manage badge rewards</p>
+      </div>
+      <div class="header-actions">
+        <div class="stats-quick">
+          <div class="stat-item">
+            <span class="stat-number" id="totalStudents">0</span>
+            <span class="stat-label">Students</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" id="avgProgress">0%</span>
+            <span class="stat-label">Avg Progress</span>
+          </div>
+        </div>
+        <button class="btn btn-refresh" id="refreshProgressBtn">
+          <i class="fas fa-sync-alt"></i> 
+          <span>Refresh Data</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Loading student progress...</p>
+    </div>
+  </div>
+
+  <!-- Enhanced Progress Table -->
+  <div class="progress-container">
+    <div class="table-header">
+      <h3><i class="fas fa-users"></i> Student Progress Overview</h3>
+      <div class="table-filters">
+        <button id="downloadReportBtn" class="btn-assign" style="margin-right:8px">
+          <i class="fas fa-file-excel"></i> Download Report
+        </button>
+        <div class="filter-group">
+          <select id="badgeFilter" class="filter-select">
+            <option value="all">All Badges</option>
+            <option value="none">No Badge</option>
+            <option value="bronze">Bronze</option>
+            <option value="silver">Silver</option>
+            <option value="gold">Gold</option>
+            <option value="platinum">Platinum</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-table-wrapper">
+      <table class="progress-table">
+        <thead>
+          <tr>
+            <th><i class="fas fa-user"></i> Student</th>
+            <th><i class="fas fa-chart-bar"></i> Progress</th>
+            <th><i class="fas fa-medal"></i> Current Badge</th>
+            <th><i class="fas fa-award"></i> New Badge</th>
+            <th class="actions-column"><i class="fas fa-cogs"></i> Actions</th>
+          </tr>
+        </thead>
+        <tbody id="studentsProgressBody">
+          <!-- Dynamic content will be inserted here -->
+        </tbody>
+      </table>
+      
+      <div class="empty-state" id="emptyState" style="display: none;">
+        <div class="empty-icon">
+          <i class="fas fa-user-graduate"></i>
+        </div>
+        <h3>No Students Found</h3>
+        <p>No students match the current filter criteria.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Toast -->
+  <div class="toast" id="successToast">
+    <div class="toast-content">
+      <i class="fas fa-check-circle"></i>
+      <span>Badge assigned successfully!</span>
+    </div>
+  </div>
+
+  <!-- Error Toast -->
+  <div class="toast error" id="errorToast">
+    <div class="toast-content">
+      <i class="fas fa-exclamation-circle"></i>
+      <span>Failed to assign badge. Please try again.</span>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Enhanced Styling */
+.content-section {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.progress-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  color: white;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.header-info h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-info p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 1rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.stats-quick {
+  display: flex;
+  gap: 24px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-refresh {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 12px 20px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.btn-refresh:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.btn-refresh:active {
+  transform: translateY(0);
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.loading-spinner {
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.progress-container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.table-header {
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.table-header h3 {
+  margin: 0;
+  color: #374151;
+  font-size: 1.25rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-filters {
+  display: flex;
+  gap: 12px;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.progress-table-wrapper {
+  overflow-x: auto;
+  position: relative;
+  min-height: 200px;
+}
+
+.progress-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.progress-table thead th {
+  background: #f8fafc;
+  padding: 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.progress-table thead th i {
+  margin-right: 6px;
+  color: #667eea;
+}
+
+.progress-table tbody tr {
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.progress-table tbody tr:hover {
+  background: #f8fafc;
+  transform: scale(1.01);
+}
+
+.progress-table tbody td {
+  padding: 20px 16px;
+  vertical-align: middle;
+}
+
+.student-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.student-avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.student-details {
+  flex: 1;
+}
+
+.student-name {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 2px;
+}
+
+.student-email {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.progress-bar-container {
+  position: relative;
+  width: 120px;
+}
+
+.progress-bar {
+  height: 12px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 6px;
+  transition: width 0.8s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.progress-text {
+  font-size: 0.85rem;
+  color: #374151;
+  font-weight: 600;
+  margin-top: 4px;
+  text-align: center;
+}
+
+.badge-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.badge-none {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.badge-bronze {
+  background: linear-gradient(135deg, #cd7f32, #a0522d);
+  color: white;
+}
+
+.badge-silver {
+  background: linear-gradient(135deg, #c0c0c0, #a8a8a8);
+  color: #374151;
+}
+
+.badge-gold {
+  background: linear-gradient(135deg, #ffd700, #ffb347);
+  color: #374151;
+}
+
+.badge-platinum {
+  background: linear-gradient(135deg, #e5e4e2, #b8b8b8);
+  color: #374151;
+}
+
+.badge-select {
+  padding: 8px 12px;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  font-size: 0.9rem;
+  min-width: 120px;
+  transition: all 0.2s ease;
+}
+
+.badge-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn-assign {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-assign:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+}
+
+.btn-assign:active {
+  transform: translateY(0);
+}
+
+.btn-assign:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.actions-column {
+  text-align: right;
+  width: 120px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  margin: 0 0 8px 0;
+  color: #374151;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #10b981;
+  color: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.toast.error {
+  background: #ef4444;
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .stats-quick {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .table-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .progress-table tbody td {
+    padding: 12px 8px;
+  }
+  
+  .student-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+
+  /* Mobile card layout */
+  .progress-table thead { display: none; }
+  .progress-table, .progress-table tbody, .progress-table tr, .progress-table td { display: block; width: 100%; }
+  .progress-table tr { background: #ffffff; margin: 10px 0; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; }
+  .progress-table td { border: none; padding: 8px 0; }
+  .actions-column { text-align: left; width: 100%; }
+  .progress-bar-container { width: 100%; }
+  .btn-assign { width: 100%; justify-content: center; }
+  .badge-select { width: 100%; }
+  .student-email { word-break: break-word; }
+  .progress-fill { transition: width .6s ease; }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+let allStudents = [];
+
+function showLoading() {
+  document.getElementById('loadingOverlay').style.display = 'flex';
+}
+
+function hideLoading() {
+  document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+function showToast(message, isError = false) {
+  const toast = document.getElementById(isError ? 'errorToast' : 'successToast');
+  const content = toast.querySelector('span');
+  content.textContent = message;
+  
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+function getStudentInitials(name) {
+  if (!name) return '?';
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function getBadgeIcon(badge) {
+  const icons = {
+    bronze: 'fas fa-medal',
+    silver: 'fas fa-medal',
+    gold: 'fas fa-trophy',
+    platinum: 'fas fa-crown'
+  };
+  return icons[badge] || 'fas fa-circle';
+}
+
+function formatBadgeDisplay(badge) {
+  if (!badge || badge === 'none') {
+    return '<span class="badge-display badge-none"><i class="fas fa-minus"></i> No Badge</span>';
+  }
+  
+  const badgeText = badge.charAt(0).toUpperCase() + badge.slice(1);
+  return `<span class="badge-display badge-${badge}"><i class="${getBadgeIcon(badge)}"></i> ${badgeText}</span>`;
+}
+
+function updateStats(students) {
+  const totalStudents = students.length;
+  const avgProgress = totalStudents > 0 
+    ? Math.round(students.reduce((sum, s) => sum + (s.overall || 0), 0) / totalStudents) 
+    : 0;
+  
+  document.getElementById('totalStudents').textContent = totalStudents;
+  document.getElementById('avgProgress').textContent = avgProgress + '%';
+}
+
+function filterStudents() {
+  const badgeFilter = document.getElementById('badgeFilter').value;
+  
+  let filtered = allStudents;
+  
+  if (badgeFilter !== 'all') {
+    filtered = allStudents.filter(student => {
+      const studentBadge = student.badge || 'none';
+      return studentBadge === badgeFilter;
+    });
+  }
+  
+  renderStudentsTable(filtered);
+}
+
+function renderStudentsTable(students) {
+  const body = document.getElementById('studentsProgressBody');
+  const emptyState = document.getElementById('emptyState');
+  
+  if (students.length === 0) {
+    body.innerHTML = '';
+    emptyState.style.display = 'block';
+    return;
+  }
+  
+  emptyState.style.display = 'none';
+  body.innerHTML = '';
+  
+  students.forEach((student, index) => {
+    const progress = typeof student.overall === 'number' ? student.overall : 0;
+    const studentName = student.name || student.email || `Student ${index + 1}`;
+    const initials = getStudentInitials(studentName);
+    
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="student-info">
+          <div class="student-avatar">${initials}</div>
+          <div class="student-details">
+            <div class="student-name">${studentName}</div>
+            ${student.email ? `<div class="student-email">${student.email}</div>` : ''}
+          </div>
+        </div>
+      </td>
+      <td>
+        <div class="progress-bar-container">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${progress}%"></div>
+          </div>
+          <div class="progress-text">${progress}%</div>
+        </div>
+      </td>
+      <td>
+        ${formatBadgeDisplay(student.badge)}
+      </td>
+      <td>
+        <select data-id="${student.id}" class="badge-select" style="margin-bottom: 0;">
+          <option value="none">No Badge</option>
+          <option value="bronze">Bronze</option>
+          <option value="silver">Silver</option>
+          <option value="gold">Gold</option>
+          <option value="platinum">Platinum</option>
+        </select>
+      </td>
+      <td class="actions-column">
+        <button class="btn-assign assign-badge" data-id="${student.id}">
+          <i class="fas fa-award"></i> Assign
+        </button>
+      </td>
+    `;
+    
+    body.appendChild(tr);
+    
+    // Set current badge value
+    const select = tr.querySelector('.badge-select');
+    if (select && student.badge) {
+      select.value = student.badge;
+    }
+  });
+  
+  // Add event listeners for assign buttons
+  document.querySelectorAll('.assign-badge').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const button = e.target.closest('.assign-badge');
+      const id = button.getAttribute('data-id');
+      const select = document.querySelector(`.badge-select[data-id="${id}"]`);
+      const newBadge = select ? select.value : 'none';
+      
+      // Disable button during request
+      button.disabled = true;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Assigning...';
+      
+      try {
+        const response = await fetch('/api/teacher/students/badge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            student_id: id, 
+            badge: newBadge 
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to assign badge');
+        }
+        
+        // Update local data
+        const studentIndex = allStudents.findIndex(s => s.id == id);
+        if (studentIndex !== -1) {
+          allStudents[studentIndex].badge = newBadge;
+        }
+        
+        showToast(`Badge ${newBadge === 'none' ? 'removed' : 'assigned'} successfully!`);
+        
+        // Refresh the display
+        setTimeout(() => {
+          filterStudents();
+        }, 500);
+        
+      } catch (error) {
+        console.error('Error assigning badge:', error);
+        showToast('Failed to assign badge. Please try again.', true);
+      } finally {
+        // Re-enable button
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-award"></i> Assign';
+      }
+    });
+  });
+}
+
+async function fetchStudentsProgress() {
+  try {
+    showLoading();
+    
+    const response = await fetch('/api/teacher/students/progress');
+    const data = await response.json();
+    allStudents = (data && data.students) ? data.students : [];
+    
+    updateStats(allStudents);
+    filterStudents(); // This will render the table
+    
+  } catch (error) {
+    console.error('fetchStudentsProgress failed:', error);
+    showToast('Failed to load student progress. Please try again.', true);
+    allStudents = [];
+    updateStats([]);
+    filterStudents();
+  } finally {
+    hideLoading();
+  }
+}
+
+// Event listeners
+document.getElementById('refreshProgressBtn')?.addEventListener('click', fetchStudentsProgress);
+document.getElementById('badgeFilter')?.addEventListener('change', filterStudents);
+
+// Download report button
+document.getElementById('downloadReportBtn')?.addEventListener('click', async () => {
+  try {
+    const resp = await fetch('/api/teacher/students/progress/export');
+    if (!resp.ok) throw new Error('Failed to generate report');
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'students_progress_report.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    console.error('Download report failed:', e);
+    showToast('Failed to download report', true);
+  }
+});
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', fetchStudentsProgress);
+
+// Add some animation delays for a smoother load
+document.addEventListener('DOMContentLoaded', function() {
+  const elements = document.querySelectorAll('.progress-header, .progress-container');
+  elements.forEach((el, index) => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+      el.style.transition = 'all 0.6s ease';
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+    }, index * 200);
+  });
+});
+</script>
+{% endblock %}

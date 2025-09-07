@@ -1,0 +1,212 @@
+{% extends "activity_base.html" %}
+{% block extra_css %}
+<style>
+    .matching-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .match-column {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .match-item {
+        padding: 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+        background: #f7fafc;
+    }
+
+    .match-item:hover {
+        background: #ebf8ff;
+        border-color: #90cdf4;
+    }
+
+    .match-item.selected {
+        background: #ebf8ff;
+        border-color: #4299e1;
+    }
+
+    .match-item.correct {
+        background: #f0fff4;
+        border-color: #48bb78;
+    }
+
+    .match-item.incorrect {
+        background: #fff5f5;
+        border-color: #f56565;
+    }
+
+    .match-feedback {
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 8px;
+        text-align: center;
+        display: none;
+    }
+
+    .correct-feedback {
+        background: #f0fff4;
+        border-left: 4px solid #48bb78;
+    }
+
+    .incorrect-feedback {
+        background: #fff5f5;
+        border-left: 4px solid #f56565;
+    }
+</style>
+{% endblock %}
+
+{% block activity_content %}
+<div class="matching-game-container">
+    <div class="matching-instructions">
+        <h3>Match the items correctly by selecting pairs from each column</h3>
+    </div>
+
+    <div class="matching-grid">
+        <div class="match-column" id="leftColumn">
+            {% for item in left_items %}
+            <div class="match-item" data-id="{{ item.id }}">{{ item.text }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="match-column" id="rightColumn">
+            {% for item in right_items|shuffle %}
+            <div class="match-item" data-id="{{ item.id }}">{{ item.text }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="match-feedback" id="matchFeedback"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class MatchingGame extends ActivitySystem {
+    constructor() {
+        super();
+        this.matches = {};
+        this.correctPairs = JSON.parse('{{ correct_matches|tojson|safe }}');
+        this.initMatchingGame();
+    }
+
+    initMatchingGame() {
+        this.leftItems = document.querySelectorAll('#leftColumn .match-item');
+        this.rightItems = document.querySelectorAll('#rightColumn .match-item');
+        this.feedbackElement = document.getElementById('matchFeedback');
+
+        this.leftItems.forEach(item => {
+            item.addEventListener('click', () => this.selectItem(item, 'left'));
+        });
+
+        this.rightItems.forEach(item => {
+            item.addEventListener('click', () => this.selectItem(item, 'right'));
+        });
+    }
+
+    selectItem(item, column) {
+        // If already matched, do nothing
+        if (item.classList.contains('correct')) return;
+
+        // Toggle selection
+        item.classList.toggle('selected');
+
+        // Store or remove from matches
+        const itemId = item.dataset.id;
+        if (item.classList.contains('selected')) {
+            this.matches[column] = itemId;
+        } else {
+            delete this.matches[column];
+        }
+
+        // Check if we have both sides selected
+        if (this.matches.left && this.matches.right) {
+            this.checkMatch();
+        }
+    }
+
+    checkMatch() {
+        const leftId = this.matches.left;
+        const rightId = this.matches.right;
+
+        // Find the selected items
+        const leftItem = Array.from(this.leftItems).find(item => item.dataset.id === leftId);
+        const rightItem = Array.from(this.rightItems).find(item => item.dataset.id === rightId);
+
+        // Check if this is a correct pair
+        const isCorrect = this.correctPairs.some(pair =>
+            (pair.left === leftId && pair.right === rightId) ||
+            (pair.left === rightId && pair.right === leftId)
+        );
+
+        // Visual feedback
+        if (isCorrect) {
+            leftItem.classList.add('correct');
+            rightItem.classList.add('correct');
+            leftItem.classList.remove('selected');
+            rightItem.classList.remove('selected');
+            this.showFeedback(true, "Correct match! Well done!");
+        } else {
+            leftItem.classList.add('incorrect');
+            rightItem.classList.add('incorrect');
+            this.showFeedback(false, "That's not quite right. Try again!");
+
+            // Reset after delay
+            setTimeout(() => {
+                leftItem.classList.remove('selected', 'incorrect');
+                rightItem.classList.remove('selected', 'incorrect');
+            }, 1500);
+        }
+
+        // Clear current selections
+        delete this.matches.left;
+        delete this.matches.right;
+
+        // Check if all matches are complete
+        this.checkCompletion();
+    }
+
+    showFeedback(isCorrect, message) {
+        this.feedbackElement.textContent = message;
+        this.feedbackElement.className = `match-feedback ${isCorrect ? 'correct-feedback' : 'incorrect-feedback'}`;
+        this.feedbackElement.style.display = 'block';
+
+        setTimeout(() => {
+            this.feedbackElement.style.display = 'none';
+        }, 2000);
+    }
+
+    checkCompletion() {
+        const unmatchedItems = Array.from(this.leftItems).filter(item =>
+            !item.classList.contains('correct')
+        );
+
+        if (unmatchedItems.length === 0) {
+            this.userResponses.completed = true;
+            this.userResponses.correctMatches = this.correctPairs.filter(pair => {
+                const leftItem = Array.from(this.leftItems).find(item => item.dataset.id === pair.left);
+                return leftItem && leftItem.classList.contains('correct');
+            }).length;
+
+            this.submitBtn.disabled = false;
+        }
+    }
+
+    validateActivity() {
+        return this.userResponses.completed || false;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    window.activitySystem = new MatchingGame();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,818 @@
+{% extends "teacher/dashboard.html" %}
+
+{% block title %}Resources - Teacher Dashboard{% endblock %}
+
+{% block page_title %}Teaching Resources{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="resources-header">
+        <div class="header-left">
+            <h2><i class="fas fa-book-open"></i> Teaching Resources</h2>
+            <p>Share educational materials with your students</p>
+        </div>
+        <button class="add-resource-btn" id="addResourceBtn">
+            <i class="fas fa-plus"></i>
+            Add New Resource
+        </button>
+    </div>
+
+    <div class="search-filters">
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="resourceSearch" placeholder="Search resources...">
+            <button class="clear-search" id="clearSearch">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="sort-dropdown">
+            <select id="resourceSort">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="name">Name A-Z</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="resources-grid" id="resourcesGrid">
+    <!-- Resources will be dynamically inserted here -->
+</div>
+
+<!-- Clean Resource Modal -->
+<div class="modal" id="resourceModal">
+    <div class="modal-content">
+        <!-- Modal Header -->
+        <div class="modal-header">
+            <h2 id="modalTitle">
+                <i class="fas fa-plus-circle"></i> <span>Add New Resource</span>
+            </h2>
+            <button class="close-btn" id="closeModal">×</button>
+        </div>
+        
+        <form id="resourceForm">
+            <!-- Basic Information -->
+            <div class="form-section">
+                <h3>Basic Information</h3>
+            <div class="form-group">
+                <label for="resourceTitle">Title <span class="required">*</span></label>
+                <input type="text" id="resourceTitle" name="title" class="form-input" required>
+            </div>
+            <div class="form-group">
+                    <label for="resourceDescription">Description</label>
+                    <textarea id="resourceDescription" name="description" rows="3" class="form-textarea" placeholder="Brief description of the resource"></textarea>
+                </div>
+                <!-- Hidden field to always set type as lesson -->
+                <input type="hidden" id="resourceType" name="type" value="lesson">
+            </div>
+
+            <!-- Content Section -->
+            <div class="form-section" id="contentGroup">
+                <h3>Content</h3>
+            <div class="form-group">
+                    <label for="resourceContent">Content <span class="required">*</span></label>
+                    <div class="editor-toolbar">
+                        <button type="button" class="toolbar-btn" data-action="bold" title="Bold"><i class="fas fa-bold"></i></button>
+                        <button type="button" class="toolbar-btn" data-action="italic" title="Italic"><i class="fas fa-italic"></i></button>
+                        <button type="button" class="toolbar-btn" data-action="heading" title="Heading"><i class="fas fa-heading"></i></button>
+                        <button type="button" class="toolbar-btn" data-action="list" title="List"><i class="fas fa-list"></i></button>
+                    </div>
+                    <div id="resourceEditor" class="rich-editor" contenteditable="true" placeholder="Enter your content here..."></div>
+                    <input type="hidden" id="resourceContent" name="content">
+                </div>
+            </div>
+
+            <!-- Interactive Content Section -->
+            <div class="form-section">
+                    <h3>Interactive Content</h3>
+                <p class="section-description">Add interactive elements to make your resource more engaging</p>
+                    <div class="interactive-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="addQuizSection()">
+                            <i class="fas fa-question-circle"></i> Add Quiz
+                        </button>
+                    <button type="button" class="btn btn-secondary" onclick="addFlashcards()">
+                            <i class="fas fa-layer-group"></i> Add Flashcards
+                        </button>
+                    <button type="button" class="btn btn-secondary" onclick="addMatchingGame()">
+                            <i class="fas fa-puzzle-piece"></i> Add Matching
+                        </button>
+                    
+                    <button type="button" class="btn btn-secondary" onclick="addTrueFalse()">
+                        <i class="fas fa-check-circle"></i> Add True/False
+                        </button>
+                </div>
+                
+                <div id="interactiveElements" class="interactive-elements">
+                    <!-- Interactive elements will be added here -->
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" id="cancelBtn">Cancel</button>
+                <button type="submit" class="btn-primary">
+                    <span class="btn-text">Create Resource</span>
+                    <div class="loading-spinner"></div>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal" id="confirmModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-exclamation-triangle"></i> Confirm Delete</h2>
+            <button class="close-btn" id="closeConfirmModal">×</button>
+        </div>
+        <p>Are you sure you want to delete this resource? This action cannot be undone.</p>
+        <div class="modal-actions">
+            <button class="btn-secondary" id="cancelDelete">Cancel</button>
+            <button class="btn-danger" id="confirmDelete">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- Assign to Students Modal -->
+<div class="modal" id="assignModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-users"></i> Assign Resource</h2>
+            <button class="close-btn" id="closeAssignModal">×</button>
+        </div>
+        <div class="form-group">
+            <label>Choose students to assign this lesson</label>
+            <div style="margin-bottom: .5rem;">
+                <label><input type="checkbox" id="assignSelectAll"> Select All</label>
+            </div>
+            <div id="assignStudentsList" class="interactive-elements"></div>
+        </div>
+        <div class="form-actions">
+            <button class="btn-secondary" id="cancelAssignBtn">Cancel</button>
+            <button class="btn-primary" id="confirmAssignBtn">Assign</button>
+        </div>
+    </div>
+    
+</div>
+
+<!-- Success/Error Notifications -->
+<div class="notification-container" id="notificationContainer"></div>
+{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="/static/css/resource-manager.css">
+<style>
+/* Resource Card Layout */
+/* --- Grid container --- */
+.resources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+/* --- Card wrapper --- */
+.resource-card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  display: flex;               /* key for 2-column layout */
+  justify-content: space-between;
+  gap: 1.25rem;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.resource-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: var(--shadow-lg);
+}
+
+/* little gradient line effect */
+.resource-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.resource-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* --- LEFT column --- */
+.resource-info {
+  flex: 2;
+}
+
+.badge {
+  display: inline-block;
+  padding: .15rem .45rem;
+  border-radius: 999px;
+  font-size: .68rem;
+  font-weight: 600;
+  margin-bottom: .25rem;
+}
+
+.badge-type { background: var(--bg-secondary); color: var(--text-secondary); }
+.badge-draft { background: #fee2e2; color: #dc2626; }
+
+.resource-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.35rem;
+  line-height: 1.3;
+}
+
+.resource-description {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;     /* 2 lines max */
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* --- RIGHT column --- */
+.resource-actions {
+  flex: 0 0 120px;             /* fixed width for vertical buttons */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: stretch;
+  text-align: center;
+}
+
+.action-btn {
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+/* Button states */
+.action-btn.primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.action-btn.primary:hover {
+  background: var(--primary-dark);
+}
+
+.action-btn.secondary {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.action-btn.secondary:hover {
+  background: var(--bg-tertiary);
+  color: var(--primary);
+}
+
+.action-btn.danger {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.action-btn.danger:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* Date label under buttons */
+.resource-date {
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+
+/* Enhanced Controls Section */
+.controls-section {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin: 2rem 0;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-container {
+    flex: 1;
+    min-width: 300px;
+    position: relative;
+}
+
+.search-container input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.search-container i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+}
+
+.search-container input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.filter-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.filter-btn {
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: white;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.sort-select {
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: white;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+    background-position: right 1rem center;
+    background-repeat: no-repeat;
+    background-size: 1.25rem;
+}
+
+/* Enhanced Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modal.show {
+    display: flex;
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    width: 90%;
+    max-width: 800px;
+    position: relative;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal.show .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modal-header h2 i {
+    color: var(--primary);
+}
+
+.close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: var(--radius-full);
+    transition: all 0.2s ease;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.form-group label .required {
+    color: var(--danger);
+    margin-left: 0.25rem;
+}
+
+.form-input, 
+.form-select, 
+.form-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    line-height: 1.5;
+}
+
+.form-textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-input:focus, 
+.form-select:focus, 
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
+}
+
+/* Form Sections */
+.form-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+}
+
+.form-section h3 {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-section h3::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+.section-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+}
+
+.interactive-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.interactive-elements {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.interactive-item {
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    position: relative;
+}
+
+.interactive-item .item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.interactive-item .item-title {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.item-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.item-actions button {
+    padding: 0.5rem;
+    border: none;
+    background: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    border-radius: var(--radius-full);
+    transition: all 0.2s ease;
+}
+
+.item-actions button:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.preview-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+}
+
+.preview-section h3 {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.preview-area {
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    min-height: 200px;
+    border: 1px solid var(--border);
+}
+
+/* Flashcard Styles */
+.flashcard-item {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.flashcard-side {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.flashcard-side label {
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.remove-flashcard {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: var(--radius-full);
+    transition: all 0.2s ease;
+}
+
+.remove-flashcard:hover {
+    background: var(--bg-tertiary);
+    color: var(--danger);
+}
+
+.add-flashcard {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: var(--bg-secondary);
+    border: 2px dashed var(--border);
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.add-flashcard:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.editor-toolbar {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.toolbar-btn {
+    padding: 0.5rem;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.toolbar-btn:hover {
+    background: var(--bg-primary);
+    color: var(--primary);
+}
+
+.toolbar-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+.rich-editor {
+    min-height: 200px;
+    padding: 1rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    outline: none;
+    line-height: 1.6;
+}
+
+.rich-editor:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.rich-editor:empty::before {
+    content: attr(placeholder);
+    color: var(--text-tertiary);
+    font-style: italic;
+}
+
+.interactive-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+}
+
+.btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-tertiary);
+}
+
+.loading-spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.required {
+    color: var(--danger);
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="/static/js/teacher-resources.js"></script>
+{% endblock %}

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeenBody Explorer: Understanding Puberty</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&family=Fredoka+One:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/puberty.css">
+    <link rel="stylesheet" href="/static/css/breadcrumbs.css">
+    <style>
+    </style>
+</head>
+<body>
+    <!-- Breadcrumbs -->
+    <div class="breadcrumbs">
+        <div class="breadcrumb-item">
+            <i class="fas fa-home breadcrumb-icon"></i>
+            <a href="/menu">Menu</a>
+        </div>
+        <div class="breadcrumb-item active">
+            <i class="fas fa-child breadcrumb-icon"></i>
+            Puberty Module
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Mascot Container -->
+        <div class="mascot-container">
+            <div class="speech-bubble">Click on any topic to learn more!</div>
+            <div class="mascot-sprite"></div>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <h1>TeenBody Explorer 🌱</h1>
+            </div>
+            <a href="/menu"class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Menu
+            </a>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section">
+            <div class="progress-header">
+                <h2 class="progress-title"><i class="fas fa-chart-line"></i> Your Learning Progress</h2>
+                <span class="progress-counter"><span id="progressCount">0</span> / 6 Complete</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="complete-section" id="completeSection" style="display: none;">
+                <button class="complete-btn" id="completeBtn">
+                    <i class="fas fa-trophy"></i> Complete Learning Journey!
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Phases Container -->
+            <div class="phases-container">
+                <div class="phase-card phase-1" data-phase="1">
+                    <div class="phase-header">
+                        <div class="phase-icon">
+                            <i class="fas fa-ruler-vertical"></i>
+                        </div>
+                        <div class="phase-info">
+                            <h3>Height Growth</h3>
+                            <div class="phase-days">Physical Changes</div>
+                        </div>
+                    </div>
+                    
+                    <div class="phase-image">
+                        <img src="/static/img/bodychanges.png" alt="Height Growth" width="400" height="400">
+                    </div>
+                    
+                    <div class="phase-content">
+                        <p class="phase-description">
+                            During puberty, you'll experience growth spurts where you might grow several inches in a short time! This is totally normal and happens at different times for everyone.
+                        </p>
+                        <div class="phase-tips">
+                            <h5><i class="fas fa-lightbulb"></i> Health tips:</h5>
+                            <p>Get enough sleep, eat nutritious foods, and stay active to support your body's growth. Remember, everyone grows at their own pace!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phase-card phase-2" data-phase="2">
+                    <div class="phase-header">
+                        <div class="phase-icon">
+                            <i class="fas fa-face-smile"></i>
+                        </div>
+                        <div class="phase-info">
+                            <h3>Skin Changes</h3>
+                            <div class="phase-days">Body Care</div>
+                        </div>
+                    </div>
+                    
+                    <div class="phase-image">
+                        <img src="/static/img/acne.webp" alt="Skin Changes" width="400" height="400">
+                    </div>
+                    
+                    <div class="phase-content">
+                        <p class="phase-description">
+                            Your skin might become oilier during puberty, which can sometimes lead to acne. Don't worry - this is normal and can be managed with good hygiene!
+                        </p>
+                        <div class="phase-tips">
+                            <h5><i class="fas fa-lightbulb"></i> Care tips:</h5>
+                            <p>Wash your face twice daily with gentle soap, stay hydrated, and maintain a balanced diet for healthy skin.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phase-card phase-3" data-phase="3">
+                    <div class="phase-header">
+                        <div class="phase-icon">
+                            <i class="fas fa-volume-up"></i>
+                        </div>
+                        <div class="phase-info">
+                            <h3>Voice Changes</h3>
+                            <div class="phase-days">Vocal Development</div>
+                        </div>
+                    </div>
+                    
+                    <div class="phase-image">
+                        <img src="/static/img/voice.png" alt="Voice Changes" width="400" height="400">
+                    </div>
+                    
+                    <div class="phase-content">
+                        <p class="phase-description">
+                            Your voice will start changing and may sometimes crack - this is perfectly normal! It's just part of growing up and happens gradually.
+                        </p>
+                        <div class="phase-tips">
+                            <h5><i class="fas fa-lightbulb"></i> Voice care tips:</h5>
+                            <p>Stay hydrated, practice speaking at your comfortable pitch, and be patient as your voice develops.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phase-card phase-4" data-phase="4">
+                    <div class="phase-header">
+                        <div class="phase-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="phase-info">
+                            <h3>Body Hair</h3>
+                            <div class="phase-days">Natural Growth</div>
+                        </div>
+                    </div>
+                    
+                    <div class="phase-image">
+                        <img src="/static/img/hair.png" alt="Body Hair" width="400" height="400">
+                    </div>
+                    
+                    <div class="phase-content">
+                        <p class="phase-description">
+                            You'll notice new hair growing in different places like under your arms and on your face. This is a natural part of puberty!
+                        </p>
+                        <div class="phase-tips">
+                            <h5><i class="fas fa-lightbulb"></i> Grooming tips:</h5>
+                            <p>Practice good hygiene, use appropriate grooming products, and remember that hair growth patterns are different for everyone.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phase-card phase-5" data-phase="5">
+                    <div class="phase-header">
+                        <div class="phase-icon">
+                            <i class="fas fa-dumbbell"></i>
+                        </div>
+                        <div class="phase-info">
+                            <h3>Muscle Growth</h3>
+                            <div class="phase-days">Physical Development</div>
+                        </div>
+                    </div>
+                    
+                    <div class="phase-image">
+                        <img src="/static/img/muscles.png" alt="Muscle Growth" width="400" height="400">
+                    </div>
+                    
+                    <div class="phase-content">
+                        <p class="phase-description">
+                            Your body will start building more muscle naturally. Regular exercise and good nutrition help support these changes.
+                        </p>
+                        <div class="phase-tips">
+                            <h5><i class="fas fa-lightbulb"></i> Exercise tips:</h5>
+                            <p>Stay active with sports or exercise you enjoy, eat protein-rich foods, and get enough rest for healthy muscle development.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phase-card phase-6" data-phase="6">
+                    <div class="phase-header">
+                        <div class="phase-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="phase-info">
+                            <h3>Emotional Changes</h3>
+                            <div class="phase-days">Mental Well-being</div>
+                        </div>
+                    </div>
+                    
+                    <div class="phase-image">
+                        <img src="/static/img/moodchanges.webp" alt="Emotional Changes" width="400" height="400">
+                    </div>
+                    
+                    <div class="phase-content">
+                        <p class="phase-description">
+                            You might experience more intense emotions during puberty. This is normal and part of growing up. Talk to someone you trust if you need support!
+                        </p>
+                        <div class="phase-tips">
+                            <h5><i class="fas fa-lightbulb"></i> Self-care tips:</h5>
+                            <p>Practice relaxation techniques, talk about your feelings with trusted friends or family, and remember it's okay to feel emotional.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        /* Mascot Animations */
+        .mascot-sprite {
+            animation: idle 2s infinite ease-in-out;
+            transition: background-position 0.01s ease-out;
+        }
+
+        .mascot-sprite.state-changing {
+            animation: mascot-bounce 0.5s ease;
+        }
+
+        @keyframes mascot-bounce {
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-15px) scale(1.05); }
+            100% { transform: translateY(0) scale(1); }
+        }
+
+        @keyframes idle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .speech-bubble {
+            transition: all 0.3s ease-out;
+        }
+
+        @keyframes bubble-bounce {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0); }
+        }
+
+        .post-quiz-card {
+            max-width: 700px;
+            margin: 50px auto;
+            background: linear-gradient(135deg, #fdfbfb, #ebedee);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            padding: 40px 30px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .post-quiz-title {
+            font-size: 2rem;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .post-quiz-desc {
+            font-size: 1.1rem;
+            color: #4a5568;
+            margin-bottom: 30px;
+        }
+
+        .quiz-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .quiz-btn,
+        .skip-btn {
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            color: white;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            box-shadow: 0 8px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .quiz-btn:hover,
+        .skip-btn:hover {
+            background: linear-gradient(135deg, #6b46c1, #4c51bf);
+            transform: translateY(-2px);
+        }
+
+        .skip-btn {
+            background: linear-gradient(135deg, #a0aec0, #718096);
+        }
+
+        .skip-btn:hover {
+            background: linear-gradient(135deg, #718096, #4a5568);
+        }
+
+        .complete-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 16px 36px;
+            border-radius: 16px;
+            border: none;
+            font-weight: 700;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.18);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 auto;
+            transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+        }
+
+        .complete-btn:hover {
+            background: linear-gradient(135deg, #6b46c1, #4c51bf);
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.25);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+    {% if post_quiz_available %}
+    <div class="post-quiz-card">
+        <h2 class="post-quiz-title">🎓 Test Your Knowledge</h2>
+        <p class="post-quiz-desc">Take the post-quiz to see what you've learned from this module!</p>
+
+        <div class="quiz-options">
+            <a href="/quiz/1/post" class="quiz-btn" type="button">Take Post-Quiz</a>
+            <a href="/menu" class="skip-btn" type="button">Skip & Return to Menu</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <script>
+        document.querySelector('.quiz-btn').addEventListener('click', function () {
+            localStorage.setItem('returnToModule', '{{ module_id }}');
+        });
+    </script>
+    <script type="module" src="/static/js/mascot.js"></script>
+    <script type="module" src="/static/js/chatbot.js"></script>
+    <script src="/static/js/puberty.js"></script>
+    <script>
+        async function updateFirebaseProgress() {
+  const auth = getAuth();
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      const userDoc = doc(db, 'users', user.uid);
+      await updateDoc(userDoc, {
+        'progress.puberty_module_complete': true,
+        'progress.last_updated': serverTimestamp()
+      });
+      console.log('Firebase progress updated successfully');
+    } catch (error) {
+      console.error('Error updating Firebase progress:', error);
+    }
+  }
+}
+
+document.getElementById('completeBtn').addEventListener('click', async function() {
+  // Update local storage
+  localStorage.setItem('puberty_module_complete', 'true');
+  
+  // Update Firebase
+  await updateFirebaseProgress();
+  
+  // Update UI
+  const pubertyCard = document.querySelector('.module-card[data-title="Puberty Basics"]');
+  if (pubertyCard) {
+    pubertyCard.classList.add('completed');
+    if (!pubertyCard.querySelector('.completed-badge')) {
+      const badge = document.createElement('div');
+      badge.className = 'completed-badge';
+      badge.innerHTML = '<i class="fas fa-check"></i> Completed';
+      pubertyCard.appendChild(badge);
+    }
+  }
+  
+  // Redirect to menu
+  window.location.href = '/menu';
+});
+    </script>
+</body>
+</html>

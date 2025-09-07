@@ -1,0 +1,29 @@
+# Firebase credentials
+*firebase-adminsdk*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+
+# Node
+node_modules/
+npm-debug.log
+
+# IDE
+.vscode/
+.idea/
+
+# Environment variables
+.env
+.env.local
+
+# System files 
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/

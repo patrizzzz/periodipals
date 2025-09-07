@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Main Menu - PeriodiPal{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/badge-system.css">
+  {% block head_extra %}
+  <style>
+  /* Responsive, mobile-first dashboard styles */
+  :root{
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --accent: #667eea;
+    --accent-2: #764ba2;
+    --muted: #6b7280;
+    --success: #10b981;
+    --danger: #ef4444;
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --shadow-md: 0 8px 22px rgba(16,24,40,0.06);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    background: linear-gradient(180deg,#f3f4f6 0%, #eef2ff 100%);
+    color: #1f2937;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    padding: 16px;
+  }
+
+  /* Top bar */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    max-width:1200px;
+    margin:0 auto 18px;
+    padding:10px 12px;
+  }
+  .brand{
+    display:flex;align-items:center;gap:12px;
+  }
+  .logo-icon{font-size:26px}
+  .app-title{font-weight:800;font-size:1.15rem;color:#0f172a}
+  .app-sub{font-size:0.9rem;color:var(--muted);margin-top:2px}
+
+  /* Profile / controls */
+  .profile-button{
+    display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:999px;background:var(--card-bg);box-shadow:var(--shadow-md);cursor:pointer;border:1px solid rgba(15,23,42,0.04);
+  }
+  .profile-button .profile-icon{font-size:18px}
+  .profile-name{font-weight:600;color:#0f172a}
+  .profile-modal{position:fixed;right:16px;top:80px;background:var(--card-bg);border-radius:12px;padding:14px;box-shadow:var(--shadow-md);display:none;min-width:260px;z-index:1200}
+  .profile-modal .profile-actions{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+  .profile-modal button{padding:8px 10px;border-radius:8px;border:1px solid rgba(15,23,42,0.04);background:#fff;cursor:pointer}
+  
+  /* Mascot selector buttons */
+  .mascot-btn{
+    padding:8px 10px;border-radius:8px;border:1px solid rgba(15,23,42,0.06);background:linear-gradient(180deg,#fff,#fbfbff);cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:8px
+  }
+  .mascot-btn.active{
+    border-color:var(--accent);
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    color:#fff;box-shadow:0 8px 20px rgba(102,126,234,0.16)
+  }
+  .mascot-btn:focus{outline:3px solid rgba(102,126,234,0.18)}
+
+  .bottom-nav{position:fixed;left:0;right:0;bottom:12px;display:flex;justify-content:space-around;gap:12px;max-width:720px;margin:0 auto;padding:10px;background:rgba(255,255,255,0.96);border-radius:999px;box-shadow:var(--shadow-md);z-index:1200}
+  .bottom-nav .nav-item{background:none;border:none;padding:10px 16px;border-radius:999px;cursor:pointer;font-weight:700}
+
+  /* Main card container */
+  .main-container{max-width:1200px;margin:0 auto}
+  .menu-card{
+    background:var(--card-bg);
+    border-radius:16px;
+    padding:18px;
+    box-shadow:var(--shadow-md);
+    border:1px solid rgba(15,23,42,0.03);
+  }
+  .menu-title{font-size:1.4rem;margin-bottom:6px}
+  .menu-subtitle{color:var(--muted);margin-bottom:12px}
+
+  .welcome-back{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+  .welcome-text{font-weight:700}
+  .progress-indicator{color:var(--muted);font-size:0.95rem}
+
+  /* Module grid - responsive */
+  .module-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:24px;
+    margin-top:24px;
+  }
+  .module-card{
+    position:relative;
+    background:var(--card-bg);
+    border-radius:16px;
+    padding:20px;
+    box-shadow:var(--shadow-sm);
+    cursor:pointer;
+    transition:all .3s ease;
+    border:2px solid #e2e8f0;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .module-card.completed {
+    border: 2px solid var(--success, #4ecdc4);
+    background: linear-gradient(135deg, #f0fdf4, white);
+  }
+  .module-card:not(.completed):hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+  }
+  .module-status-badge, .completed-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: white;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+  }
+  .completed-badge {
+    background: var(--success, #4ecdc4);
+  }
+  .module-status-badge {
+    background: var(--accent, #667eea);
+  }
+  .completed-badge i, .module-status-badge i {
+    font-size: 12px;
+  }
+  .module-card:focus{outline:3px solid rgba(102,126,234,0.12);transform:translateY(-6px);}
+  .module-card:hover{transform:translateY(-6px);box-shadow:0 16px 40px rgba(2,6,23,0.08)}
+  .module-icon{font-size:26px;width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--accent),var(--accent-2));color:#fff}
+  .module-title{font-weight:700;font-size:1rem}
+  .module-description{font-size:0.9rem;color:var(--muted);line-height:1.2}
+
+  /* Make module description concise on small screens */
+  @media (max-width:420px){
+    .module-card{padding:12px;min-height:110px}
+    .module-icon{width:44px;height:44px;font-size:22px}
+    .module-title{font-size:0.96rem}
+    .module-description{font-size:0.85rem}
+  }
+
+  /* Tablet */
+  @media (min-width:421px) and (max-width:900px){
+    .module-card{padding:14px;min-height:130px}
+    .menu-card{padding:18px}
+    .topbar{padding:8px 6px}
+  }
+
+  /* Desktop */
+  @media (min-width:901px){
+    .menu-card{padding:22px}
+    .module-card{min-height:150px}
+    .module-icon{width:64px;height:64px;font-size:30px;border-radius:14px}
+    .module-title{font-size:1.05rem}
+    .module-description{font-size:0.95rem}
+  }
+
+  /* Accessibility improvements */
+  .module-card .module-title, .module-card .module-description{pointer-events:none}
+  .module-card:active{transform:translateY(-2px)}
+
+  /* Music player adjustments */
+  .music-player{position:fixed;right:12px;top:12px;background:rgba(255,255,255,0.95);padding:8px;border-radius:999px;box-shadow:var(--shadow-md);z-index:1000}
+  @media (max-width:600px){.music-player{right:10px;bottom:10px;top:auto}}
+
+  /* Progress popup and tooltips slightly fine-tuned */
+  .progress-popup{backdrop-filter: blur(4px)}
+  /* Simple chat bot (client-side stub; replace sendToAPI to connect to Gemini later) */
+  .chat-overlay{position:fixed;inset:0;background:rgba(2,6,23,0.55);display:none;align-items:center;justify-content:center;z-index:1400}
+  .chat-panel{background:var(--card-bg);border-radius:12px;padding:12px;max-width:720px;width:94%;box-shadow:var(--shadow-md);border:1px solid rgba(15,23,42,0.06);display:flex;flex-direction:column}
+  .chat-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:8px;border-bottom:1px solid rgba(15,23,42,0.03)}
+  .chat-messages{margin-top:10px;overflow:auto;max-height:56vh;display:flex;flex-direction:column;gap:8px;padding-right:6px}
+  .chat-message{padding:10px;border-radius:10px;max-width:84%;line-height:1.3}
+  .chat-message.user{align-self:flex-end;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff}
+  .chat-message.bot{align-self:flex-start;background:var(--bg);border:1px solid rgba(15,23,42,0.03);color:var(--muted)}
+  .chat-input-row{display:flex;gap:8px;margin-top:10px}
+  .chat-input-row input{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(15,23,42,0.06)}
+  .chat-input-row button{padding:10px 12px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer}
+  .progress-overlay{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:none;align-items:center;justify-content:center;z-index:1300}
+  .progress-panel{background:var(--card-bg);border-radius:12px;padding:18px;max-width:760px;width:92%;box-shadow:var(--shadow-md);border:1px solid rgba(15,23,42,0.05)}
+  .progress-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .overall-bar{height:12px;background:var(--bg-tertiary);border-radius:999px;overflow:hidden}
+  .overall-bar .fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%}
+  .module-progress-list{display:flex;flex-direction:column;gap:10px;margin-top:12px;max-height:44vh;overflow:auto;padding-right:6px}
+  /* Progress popup extras */
+  #progressOverlay .close-btn{font-size:18px;padding:6px 8px;border-radius:8px}
+  #progressOverlay .module-progress-item{background:#fff}
+  .module-progress-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px;border-radius:8px;background:linear-gradient(180deg,#fff,#fbfbff);border:1px solid rgba(15,23,42,0.03)}
+  .module-progress-info{display:flex;gap:12px;align-items:center}
+  .module-progress-name{font-weight:600}
+  .module-progress-bar{width:180px;height:8px;background:var(--bg-tertiary);border-radius:999px;overflow:hidden}
+  .module-progress-bar .fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%}
+  .progress-actions{display:flex;gap:8px;align-items:center}
+  .tour-tooltip{max-width:320px}
+
+  /* Small utilities */
+  .hidden-sm{display:none}
+  @media(min-width:700px){.hidden-sm{display:block}}
+
+  /* Profile modal and bottom nav */
+  .profile-modal {
+    position: fixed;
+    right: 16px;
+    top: 80px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow-md);
+    display: none;
+    min-width: 320px;
+    z-index: 1200;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+  
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1300;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal-content {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    max-height: 80vh;
+    overflow: hidden;
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-secondary);
+  }
+  
+  .form-group {
+    margin-bottom: 16px;
+  }
+  
+  .profile-view {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .profile-view .empty-state {
+    color: var(--text-secondary);
+    text-align: center;
+    font-style: italic;
+  }
+  
+  .profile-info {
+    display: grid;
+    gap: 8px;
+  }
+  
+  .profile-info-item {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .profile-info-label {
+    color: var(--text-secondary);
+  }
+  
+  .action-btn {
+    width: 100%;
+    padding: 8px;
+    background: var(--accent);
+    color: rgb(0, 0, 0);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 500;
+  }
+  .profile-settings h3 {
+    margin-bottom: 16px;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  .settings-section {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .settings-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .setting-item {
+    margin-bottom: 16px;
+  }
+  .setting-item:last-child {
+    margin-bottom: 0;
+  }
+  .setting-item label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  .setting-item input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.95rem;
+  }
+  .setting-item input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(102,126,234,0.1);
+  }
+  .save-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--accent);
+    color: rgb(0, 0, 0);
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .save-btn:hover {
+    background: var(--accent-dark);
+  }
+  .teacher-code-form {
+    margin-top: 12px;
+  }
+  .input-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .error-message {
+    color: var(--danger);
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+  .success-message {
+    color: var(--success);
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+  .current-teacher {
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+  }
+  .mascot-buttons { display: flex; gap: 8px; }
+  .mascot-btn { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: white; cursor: pointer; transition: all 0.2s; }
+  .mascot-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .tts-toggle { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: white; cursor: pointer; display: flex; justify-content: center; }
+  .profile-modal .profile-actions{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+  .profile-modal button{padding:8px 10px;border-radius:8px;border:1px solid rgba(15,23,42,0.04);background:#fff;cursor:pointer}
+  .bottom-nav{position:fixed;left:0;right:0;bottom:12px;display:flex;justify-content:space-around;gap:12px;max-width:720px;margin:0 auto;padding:10px;background:rgba(255,255,255,0.96);border-radius:999px;box-shadow:var(--shadow-md);z-index:1200}
+  .bottom-nav .nav-item{background:none;border:none;padding:10px 16px;border-radius:999px;cursor:pointer;font-weight:700}
+
+  /* Teacher resources and cards */
+  .resource-card, .activity-card, .upload-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+  }
+
+  .resource-card {
+    background: var(--card-bg);
+  }
+
+  .activity-card {
+    background: var(--card-bg);
+  }
+
+  .upload-card {
+    background: var(--card-bg);
+  }
+
+  .resource-list, .activity-list {
+    display: none;
+    margin-top: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 12px;
+  }
+
+  .resource-list.show, .activity-list.show {
+    display: block;
+  }
+
+  .resource-item, .activity-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+    color: var(--dark);
+    text-decoration: none;
+  }
+
+  .resource-item:hover, .activity-item:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
+  </style>
+  {% endblock %}
+</head>
+<body>
+  <div class="bg-elements">
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+  </div>
+
+  {% block content %}
+  <div id="headerActions" style="position:fixed;top:16px;right:16px;z-index:1500;display:flex;align-items:center;gap:10px">
+      <div class="profile-button" id="profileBtn" role="button" aria-haspopup="dialog" aria-expanded="false">
+        <div class="profile-icon">👤</div>
+        <span class="profile-name" id="profileName">Loading...</span>
+      </div>
+  </div>
+  <div class="notif-dropdown" id="notifDropdown" style="position:fixed;right:16px;top:56px;background:#fff;border-radius:12px;padding:12px;box-shadow:var(--shadow-md);display:none;min-width:320px;z-index:1250;max-height:60vh;overflow:auto"></div>
+
+  <div class="main-container">
+    <!-- Main Content Section -->
+    <div class="content-section">
+      <div class="menu-card">
+        <h1 class="menu-title">PeriodiPal Menu</h1>
+        <p class="menu-subtitle">Choose a module to continue your learning journey! ✨</p>
+        
+        <div class="welcome-back">
+          <div class="welcome-text">Ready for your next adventure? 🚀</div>
+          <div class="progress-indicator">Select any topic below to get started!</div>
+        </div>
+        <div class="module-grid" id="moduleGrid">
+          <a href="/module/1" class="module-card" tabindex="0" data-title="Puberty Basics" data-description="Learn about the amazing changes happening in your body">
+            <div class="module-icon">🌸</div>
+            <div class="module-title">Puberty Basics</div>
+            <div class="module-description">Learn about the amazing changes happening in your body during puberty</div>
+          </a>
+          
+          <a href="/module/2" class="module-card" tabindex="0" data-title="Reproductive System" data-description="Discover how your reproductive system works">
+            <div class="module-icon">🫀</div>
+            <div class="module-title">Reproductive System</div>
+            <div class="module-description">Understand the parts and functions of your reproductive system</div>
+          </a>
+          
+          <a href="/module/3" class="module-card" tabindex="0" data-title="Hand Washing" data-description="Learn proper hygiene and health practices">
+            <div class="module-icon">🧼</div>
+            <div class="module-title">Hygiene & Health</div>
+            <div class="module-description">Master proper hygiene habits and health practices</div>
+          </a>
+          
+          <a href="/mini-games" class="module-card" tabindex="0" data-title="Fun Activities" data-description="Play educational games and activities">
+            <div class="module-icon">🎮</div>
+            <div class="module-title">Fun Activities</div>
+            <div class="module-description">Learn through fun interactive games and activities</div>
+          </a>
+
+          <a href="/module/5" class="module-card" tabindex="0" data-title="Menstrual Cycle" data-description="Track and understand your menstrual cycle">
+            <div class="module-icon">📅</div>
+            <div class="module-title">Menstrual Cycle</div>
+            <div class="module-description">Understanding your monthly cycle and changes</div>
+          </a>
+
+          <a href="/module/6" class="module-card" tabindex="0" data-title="PMS Guide" data-description="Understanding and managing PMS">
+            <div class="module-icon">💗</div>
+            <div class="module-title">Pre Menstrual Syndrome</div>
+            <div class="module-description">Learn about PMS and how to manage symptoms</div>
+          </a>
+
+          <a href="/module/7" class="module-card" data-module="7" tabindex="0" data-title="Adolescent Health Situation" data-description="Understanding Health Challenges Among Filipino Youth">
+            <div class="module-icon">🏥</div>
+            <div class="module-title">Adolescent Health</div>
+            <div class="module-description">Explore health challenges and solutions for Filipino youth</div>
+          </a>
+        
+          <!-- Teacher resources and cards -->
+          <a href="/class-activities" class="module-card activity-card" id="classActivities">
+            <div class="module-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <h3 class="module-title">Class Activities</h3>
+            <p class="module-description">View assignments and interactive projects</p>
+          </a>
+
+          <a href="/learning-materials" class="module-card upload-card" id="teacherUploads">
+            <div class="module-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <h3 class="module-title">Learning Materials</h3>
+            <p class="module-description">Recent materials uploaded by your teacher</p>
+            <div class="resource-list" id="uploadsList"></div>
+          </a>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock %}
+
+  <!-- Profile modal -->
+  <div class="profile-modal" id="profileModal" role="dialog" aria-modal="false" aria-hidden="true">
+    <div class="profile-settings">
+      <div class="settings-section">
+        <h3>My Profile</h3>
+        <div id="profileView" class="profile-view">
+          <div class="profile-info">
+            <div class="profile-info-item">
+              <span class="profile-info-label">First Name:</span>
+              <span id="profileFirstName">-</span>
+            </div>
+            <div class="profile-info-item">
+              <span class="profile-info-label">Middle Initial:</span>
+              <span id="profileMiddleInitial">-</span>
+            </div>
+            <div class="profile-info-item">
+              <span class="profile-info-label">Last Name:</span>
+              <span id="profileLastName">-</span>
+            </div>
+            <div class="profile-info-item">
+              <span class="profile-info-label">Age:</span>
+              <span id="profileAge">-</span>
+            </div>
+          </div>
+        </div>
+        <button id="editProfileBtn" class="action-btn">
+          <i class="fas fa-edit"></i> Edit Profile
+        </button>
+      </div>
+      <div class="settings-section">
+        <h3>Mascot Settings</h3>
+        <div class="setting-item">
+          <label>Mascot Voice</label>
+          <div class="mascot-buttons">
+            <button id="mascotMaleBtn" class="mascot-btn" onclick="setMascotGender('male')">Male</button>
+            <button id="mascotFemaleBtn" class="mascot-btn" onclick="setMascotGender('female')">Female</button>
+          </div>
+        </div>
+        <div class="setting-item">
+          <label>Text-to-Speech</label>
+          <button id="ttsToggleBtn" class="tts-toggle" onclick="toggleMascotTTS()">
+            <span class="tts-status">ON</span>
+          </button>
+        </div>
+      </div>
+      <div class="profile-actions">
+        <button onclick="window.location.href='/logout'" id="logoutBtn">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Edit Modal -->
+  <div class="modal" id="profileEditModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit Profile</h3>
+        <button class="close-btn" id="closeProfileEdit">&times;</button>
+      </div>
+      <form id="profileEditForm">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" name="firstName" required>
+        </div>
+        <div class="form-group">
+          <label for="middleInitial">Middle Initial</label>
+          <input type="text" id="middleInitial" name="middleInitial" maxlength="1">
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" name="lastName" required>
+        </div>
+        <div class="form-group">
+          <label for="age">Age</label>
+          <input type="number" id="age" name="age" required min="13" max="19">
+        </div>
+        <button type="submit" class="save-btn">Save Changes</button>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Progress overlay / panel -->
+  <div class="progress-overlay" id="progressOverlay" aria-hidden="true">
+    <div class="progress-panel" role="dialog" aria-modal="true" aria-labelledby="progressTitle">
+      <div class="progress-header">
+        <div>
+          <h3 id="progressTitle" style="margin:0">Your Progress</h3>
+          <div id="progressSubtitle" style="color:var(--muted);font-size:0.9rem">Overview of module completion</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="progress-percentage" id="progressPercentage">0%</div>
+          <button class="close-btn" aria-label="Close progress">✕</button>
+        </div>
+      </div>
+      <div style="margin-bottom:10px">
+        <div class="overall-bar"><div class="fill" id="overallProgress" style="width:0%"></div></div>
+      </div>
+      <div class="module-progress-list" id="moduleProgressList">
+        <!-- Module items inserted here -->
+      </div>
+      <div style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px">
+        <button id="refreshProgress" type="button">Refresh</button>
+        <button id="closeProgressPanel" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Achievements Modal -->
+  <div class="modal" id="achievementsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Achievements</h3>
+        <button class="close-btn" id="closeAchievements">&times;</button>
+      </div>
+      <div id="achievementsBody" style="max-height:60vh;overflow:auto;padding-right:6px">
+        <div id="achievementsEmpty" style="color:var(--muted)">No badges yet. Complete lessons or earn awards from your teacher!</div>
+        <div id="achievementsList" style="display:grid;gap:10px"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Chat overlay / Ask MHM bot (client stub) -->
+  <div class="chat-overlay" id="chatOverlay" aria-hidden="true">
+    <div class="chat-panel" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
+      <div class="chat-header">
+        <h3 id="chatTitle" style="margin:0">Ask MHM Bot</h3>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="chatClose" aria-label="Close chat">✕</button>
+        </div>
+      </div>
+      <div class="chat-messages" id="chatMessages" aria-live="polite"></div>
+      <div class="chat-input-row">
+        <input id="chatInput" type="text" placeholder="Ask about a topic in MHM (e.g. 'menstrual cycle')" aria-label="Ask MHM" />
+        <button id="chatSend">Send</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bottom navigation -->
+  <nav class="bottom-nav" role="navigation" aria-label="Main navigation">
+    <button class="nav-item" id="navProgress">📊 Progress <span id="navProgressBadge" style="margin-left:6px;padding:4px 8px;border-radius:999px;background:linear-gradient(90deg,#22c55e 0%, #a7f3d0 100%);color:#0f172a;font-weight:700;font-size:12px">0%</span></button>
+    <button class="nav-item" id="navNotif" aria-haspopup="true" aria-expanded="false">
+      🔔 Notifications <span id="navNotifBadge" style="display:none;background:#ef4444;color:#fff;border-radius:999px;padding:2px 6px;font-size:10px;margin-left:6px">0</span>
+    </button>
+    <button class="nav-item" id="navProfile">🏆 Achievements</button>
+  </nav>
+
+  {% block scripts %}
+    <script type="module" src="/static/js/mascot.js"></script>
+    <script type="module" src="/static/js/app.js"></script>
+    <script type="module" src="/static/js/auth_sync.js"></script>
+    <script type="module" src="/static/js/chatbot.js"></script>
+    <script type="module">
+  // Notifications
+  async function fetchNotifications(){
+    try{
+      const r = await fetch('/api/teacher/notifications',{credentials:'same-origin'});
+      const d = await r.json();
+      const list = Array.isArray(d.notifications)? d.notifications: [];
+      const unread = list.filter(n=>!n.read).length;
+      const badge = document.getElementById('notifBadge');
+      if(badge){ badge.style.display = unread>0? 'inline-block':'none'; badge.textContent = unread; }
+      const dd = document.getElementById('notifDropdown');
+      if(dd){
+        dd.innerHTML = list.length? list.map(n=>`<div class=\"notif-item\" data-id=\"${n.id}\"><strong>${n.title || 'New lesson available'}</strong><div style=\"font-size:12px;color:var(--muted)\">${n.created_at? new Date(n.created_at).toLocaleString(): ''}</div></div>`).join('') : '<div class="notif-item">No notifications</div>';
+        dd.querySelectorAll('.notif-item').forEach(el=>{
+          el.addEventListener('click', async ()=>{
+            const id = el.getAttribute('data-id');
+            try{ await fetch(`/api/teacher/notifications/${id}/read`,{method:'POST',credentials:'same-origin'});}catch(e){}
+            dd.style.display='none';
+            fetchNotifications();
+          });
+        });
+      }
+    }catch(e){ console.warn('fetchNotifications failed',e); }
+  }
+  const notifBtn = document.getElementById('notifBtn');
+  if (notifBtn) notifBtn.addEventListener('click',()=>{
+    const dd = document.getElementById('notifDropdown');
+    const isOpen = dd.style.display==='block';
+    if (isOpen){ dd.style.display='none'; return; }
+    // Position dropdown aligned to the bell button
+    const rect = notifBtn.getBoundingClientRect();
+    dd.style.position = 'fixed';
+    dd.style.top = (rect.bottom + 8) + 'px';
+    dd.style.left = Math.max(12, rect.right - dd.offsetWidth) + 'px';
+    dd.style.right = 'auto';
+    dd.style.display = 'block';
+  });
+  setInterval(fetchNotifications, 20000);
+  fetchNotifications();
+
+  // Keep footer badge in sync
+  async function updateFooterBadge(){
+    try{
+      const r = await fetch('/api/teacher/notifications',{credentials:'same-origin'});
+      const d = await r.json();
+      const list = Array.isArray(d.notifications)? d.notifications: [];
+      const unread = list.filter(n=>!n.read).length;
+      const b = document.getElementById('navNotifBadge');
+      if (b){ b.style.display = unread>0? 'inline-block':'none'; b.textContent = unread; }
+    }catch(e){}
+  }
+  setInterval(updateFooterBadge, 20000);
+  updateFooterBadge();
+
+  // Bottom progress percent (averaged across visible modules similar to popup)
+  async function updateBottomProgress(){
+    try{
+      const resp = await fetch('/api/progress', { credentials: 'same-origin' });
+      if (!resp.ok) return;
+      const progress = await resp.json();
+      const cards = Array.from(document.querySelectorAll('.module-card'));
+      const ids = cards.map(card => card.getAttribute('data-module') || (card.getAttribute('href')||'').split('/').pop()).filter(Boolean);
+      if (!ids.length) return;
+      let total = 0; let count = 0;
+      ids.forEach(id=>{
+        const entry = progress && (progress[id] || progress[String(id)]) || {};
+        let pct = 0;
+        if (entry.post_quiz_completed === true) pct = 100;
+        else if (typeof entry.percent === 'number') pct = Math.round(entry.percent);
+        else if (entry.pre_quiz_completed === true) pct = 50;
+        total += pct; count += 1;
+      });
+      const overall = count ? Math.round(total / count) : 0;
+      const badge = document.getElementById('navProgressBadge');
+      if (badge) badge.textContent = overall + '%';
+    }catch(e){ /* ignore */ }
+  }
+  setInterval(updateBottomProgress, 20000);
+  updateBottomProgress();
+
+// Age group handling
+// Initialize ageGroup from template variable first
+let ageGroup = '{{ ageGroup }}';
+console.log('Initial ageGroup from template:', ageGroup);
+
+if (ageGroup === 'None' || !ageGroup) {
+    // Try to get from localStorage first
+    const storedProfile = localStorage.getItem('userProfile');
+    if (storedProfile) {
+        const profileData = JSON.parse(storedProfile);
+        ageGroup = profileData.age || profileData.ageGroup;
+        console.log('ageGroup from localStorage:', ageGroup);
+    } else {
+        ageGroup = null;
+        console.log('No profile data in localStorage');
+    }
+}
+
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import BadgeSystem from "/static/js/badge-system.js";
+
+async function loadProfileData(uid) {
+    try {
+        if (!uid || typeof uid !== 'string') {
+            throw new Error('Invalid UID provided');
+        }
+        const db = getFirestore();
+        const userRef = doc(db, 'users', uid.toString());
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+            const userData = userSnap.data();
+            if (userData.role) {
+                localStorage.setItem('user_role', userData.role);
+            }
+            return userData;
+        }
+        return null;
+    } catch (error) {
+        console.error('Error loading profile:', error);
+        return null;
+    }
+}
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB7j5oSrNFAHHIfLQZvEh-VRg_OVqQ4EQ4",
+  authDomain: "menstrual-hygiene-manage-6b0ed.firebaseapp.com",
+  projectId: "menstrual-hygiene-manage-6b0ed",
+  storageBucket: "menstrual-hygiene-manage-6b0ed.appspot.com",
+  messagingSenderId: "1002865022115",
+  appId: "1:1002865022115:web:ab79150f8a8d82e9171b16"
+};
+let app;
+if (getApps().length === 0) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApp();
+}
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const profileName = document.getElementById('profileName');
+const profileBtn = document.getElementById('profileBtn');
+const profileModal = document.getElementById('profileModal');
+const logoutBtn = document.getElementById('logoutBtn');
+
+// Render profile into DOM elements
+function renderProfile(profile) {
+    if (!profile || typeof profile !== 'object') return;
+    const nameEl = document.getElementById('profileName');
+    const firstEl = document.getElementById('profileFirstName');
+    const midEl = document.getElementById('profileMiddleInitial');
+    const lastEl = document.getElementById('profileLastName');
+    const ageEl = document.getElementById('profileAge');
+
+    const displayName = ((profile.firstName || '') + ' ' + (profile.lastName || '')).trim() || profile.email || 'Guest';
+    if (nameEl) nameEl.textContent = displayName;
+    if (firstEl) firstEl.textContent = profile.firstName || '-';
+    if (midEl) midEl.textContent = profile.middleInitial || '-';
+    if (lastEl) lastEl.textContent = profile.lastName || '-';
+    if (ageEl) ageEl.textContent = profile.age || '-';
+}
+
+// Try to render from localStorage first, fallback to fetching the API
+async function renderProfileFromLocalStorageOrFetch() {
+    try {
+        const stored = localStorage.getItem('userProfile');
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            renderProfile(parsed);
+            return;
+        }
+        // Fallback: fetch server profile
+        const resp = await fetch('/api/student/profile', { credentials: 'same-origin' });
+        if (!resp.ok) return;
+        const data = await resp.json();
+        if (data && (data.success || data.profile)) {
+            const profileData = data.profile || data;
+            // store for next time
+            localStorage.setItem('userProfile', JSON.stringify(profileData));
+            renderProfile(profileData);
+        }
+    } catch (e) {
+        console.warn('renderProfileFromLocalStorageOrFetch failed', e);
+    }
+}
+
+async function clearAllStoredData() {
+    // Only clear temporary session data, preserve user preferences and progress
+    const preserveKeys = ['userProfile', 'moduleProgress', 'userPreferences'];
+    const dataToPreserve = {};
+    
+    // Save data we want to keep
+    preserveKeys.forEach(key => {
+        const value = localStorage.getItem(key);
+        if (value) dataToPreserve[key] = value;
+    });
+    
+    // Clear everything
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Restore preserved data
+    Object.entries(dataToPreserve).forEach(([key, value]) => {
+        localStorage.setItem(key, value);
+    });
+}
+
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        try {
+            const userDocRef = doc(db, "users", user.uid);
+            const userDoc = await getDoc(userDocRef);
+            
+            // Create user document if it doesn't exist
+            if (!userDoc.exists()) {
+                const initialData = {
+                    email: user.email,
+                    createdAt: serverTimestamp(),
+                    lastLogin: serverTimestamp(),
+                    moduleProgress: {},
+                    role: 'student'
+                };
+                await setDoc(userDocRef, initialData);
+            }
+            
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                console.log('Firebase user data:', userData);
+                console.log('Firebase age/ageGroup:', userData.age, userData.ageGroup);
+                // save to localStorage and render immediately
+                localStorage.setItem('userProfile', JSON.stringify(userData));
+                renderProfile(userData);
+
+                // Update profile display
+                if (profileName) {
+                    profileName.textContent = userData.firstName || user.email;
+                }
+
+                // Normalize and merge with any locally stored data
+                const storedProfile = localStorage.getItem('userProfile');
+                const storedData = storedProfile ? JSON.parse(storedProfile) : {};
+
+                const normalizedData = {
+                    ...storedData, // Keep any locally stored data
+                    firstName: userData.firstName || userData.first_name || storedData.firstName || '',
+                    lastName: userData.lastName || userData.last_name || storedData.lastName || '',
+                    middleInitial: userData.middleInitial || userData.middle_initial || storedData.middleInitial || '',
+                    age: userData.age || storedData.age || '',
+                    email: user.email,
+                    ageGroup: userData.ageGroup || userData.age_group || storedData.ageGroup || '',
+                    role: userData.role || storedData.role || 'student',
+                    lastLogin: serverTimestamp(),
+                    moduleProgress: userData.moduleProgress || storedData.moduleProgress || {}
+                };
+
+                // Store normalized data in localStorage
+                localStorage.setItem('userProfile', JSON.stringify(normalizedData));
+
+                // Update Firestore with merged data
+                await updateDoc(userDocRef, normalizedData);
+
+                // Sync with server session
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        uid: user.uid,
+                        email: user.email,
+                        profile: normalizedData
+                    })
+                });
+
+                if (!response.ok) {
+                    console.error("Error syncing with server session");
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching/syncing user data:", error);
+        }
+    } else {
+        // User is signed out
+        if (profileName) {
+            profileName.textContent = 'Guest';
+        }
+        // Clear only temporary session data while preserving important user data
+        await clearAllStoredData();
+    }
+});
+
+profileBtn.addEventListener('click', function(e) {
+    const isOpen = profileModal.style.display === 'block';
+    profileModal.style.display = isOpen ? 'none' : 'block';
+    profileBtn.setAttribute('aria-expanded', String(!isOpen));
+    if (!isOpen) {
+        // populate profile view when opening
+        renderProfileFromLocalStorageOrFetch();
+    }
+});
+document.addEventListener('click', function(e) {
+    if (profileModal && !profileModal.contains(e.target) && !profileBtn.contains(e.target)) {
+        profileModal.style.display = 'none';
+        profileBtn.setAttribute('aria-expanded', 'false');
+    }
+});
+logoutBtn.addEventListener('click', async function() {
+    try {
+        await clearAllStoredData();
+    } catch (err) {
+        console.error('Error clearing data:', err);
+    }
+
+    try {
+        await signOut(auth);
+    } catch (err) {
+        console.error('Error signing out from Firebase:', err);
+    }
+
+    try {
+        // Call server-side logout to clear Flask session cookie
+        await fetch('/logout', { method: 'GET', credentials: 'same-origin' });
+    } catch (err) {
+        console.warn('Server logout request failed:', err);
+    }
+
+    // Redirect to home regardless
+    window.location.href = '/';
+});
+
+// Progress popup functionality
+const progressPopup = document.getElementById('progressPopup');
+const overallProgress = document.getElementById('overallProgress');
+const progressPercentage = document.getElementById('progressPercentage');
+const completedQuizzes = document.getElementById('completedQuizzes');
+const achievementsList = document.getElementById('achievementsList');
+
+async function openProgressPopup() {
+  // Build per-module progress from localStorage or DOM
+  const moduleCards = Array.from(document.querySelectorAll('.module-card'));
+  const modules = moduleCards.map(card => {
+    // try data-module first, then href
+    const moduleAttr = card.getAttribute('data-module');
+    let id = moduleAttr || (card.getAttribute('href') || '').split('/').pop();
+    const nameEl = card.querySelector('.module-title');
+    const name = nameEl ? nameEl.textContent.trim() : `Module ${id}`;
+    return { id, name };
+  }).filter(m => m.id);
+
+  // Attempt to fetch server progress (optional). If fails, fallback to localStorage-based status
+  let serverProgress = null;
+  try {
+    console.log('openProgressPopup: fetching /api/progress');
+    const resp = await fetch('/api/progress', { credentials: 'same-origin' });
+    console.log('openProgressPopup: /api/progress status', resp.status);
+    if (resp.ok) {
+      serverProgress = await resp.json();
+      console.log('openProgressPopup: serverProgress received', serverProgress);
+    } else {
+      console.warn('openProgressPopup: /api/progress returned non-ok status');
+    }
+  } catch (e) {
+    console.warn('openProgressPopup: failed to fetch /api/progress', e);
+  }
+
+  const listEl = document.getElementById('moduleProgressList');
+  listEl.innerHTML = '';
+
+  let totalPercent = 0;
+  // helper to normalize a module entry into percent 0..100
+  const toPercent = (entry, id) => {
+    try {
+      if (!entry) return 0;
+      if (entry.post_quiz_completed === true) return 100;
+      if (typeof entry.percent === 'number') return Math.max(0, Math.min(100, Math.round(entry.percent)));
+      if (typeof entry.percent === 'string') {
+        const pv = parseFloat(entry.percent);
+        if (!isNaN(pv)) return Math.max(0, Math.min(100, Math.round(pv)));
+      }
+      if (entry.score !== undefined) {
+        const sv = parseFloat(entry.score);
+        if (!isNaN(sv)) return Math.max(0, Math.min(100, Math.round(sv)));
+      }
+      if (entry.pre_quiz_completed === true) return 50;
+    } catch(_) {}
+    // localStorage fallbacks
+    const postKey = `module_${id}_post_quiz`;
+    const preKey = `module_${id}_pre_quiz`;
+    const scoreKey = `module_${id}_quizScore`;
+    if (localStorage.getItem(postKey) === 'true' || localStorage.getItem(postKey) === '1') return 100;
+    const sv = parseFloat(localStorage.getItem(scoreKey));
+    if (!isNaN(sv)) return Math.max(0, Math.min(100, Math.round(sv)));
+    if (localStorage.getItem(preKey) === 'true' || localStorage.getItem(preKey) === '1') return 50;
+    const generic = localStorage.getItem(`module_${id}_progress`);
+    if (generic) {
+      try { const val = JSON.parse(generic).percent; const gv = parseFloat(val); if (!isNaN(gv)) return Math.round(gv); } catch(_) {}
+    }
+    return 0;
+  };
+
+  // Normalize server structure
+  const progMap = (serverProgress && (serverProgress.progress || serverProgress)) || {};
+
+  modules.forEach(mod => {
+    const entry = progMap[mod.id] || progMap[String(mod.id)];
+    const percent = toPercent(entry, mod.id);
+    totalPercent += percent;
+
+    const item = document.createElement('div');
+    item.className = 'module-progress-item';
+    item.innerHTML = `
+      <div class="module-progress-info">
+        <div class="module-progress-name">${mod.name}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="module-progress-bar"><div class="fill" style="width:${percent}%"></div></div>
+        <div style="min-width:40px;text-align:right">${percent}%</div>
+      </div>
+    `;
+    listEl.appendChild(item);
+  });
+
+  const overall = modules.length ? Math.round(totalPercent / modules.length) : 0;
+  const overallFill = document.getElementById('overallProgress');
+  const pctEl = document.getElementById('progressPercentage');
+  if (overallFill) overallFill.style.width = overall + '%';
+  if (pctEl) pctEl.textContent = overall + '%';
+
+  // show the overlay
+  const overlay = document.getElementById('progressOverlay');
+  if (overlay) { overlay.style.display = 'flex'; overlay.setAttribute('aria-hidden','false'); }
+}
+
+function closeProgressPopup() {
+  const overlay = document.getElementById('progressOverlay');
+  if (overlay) { overlay.classList.remove('active'); overlay.style.display = 'none'; overlay.setAttribute('aria-hidden','true'); }
+}
+
+// Open progress popup for demo (remove this in production)
+document.addEventListener('DOMContentLoaded', () => {
+    // Load and display profile data
+    async function loadProfileData(forceRefresh = false) {
+        try {
+            const response = await fetch('/api/student/profile');
+            if (!response.ok) throw new Error('Failed to load profile');
+            
+            const data = await response.json();
+            if (data.success && data.profile) {
+                // Safely update profile elements if they exist
+                const profileElements = {
+                    name: document.getElementById('profileName'),
+                    firstName: document.getElementById('profileFirstName'),
+                    middleInitial: document.getElementById('profileMiddleInitial'),
+                    lastName: document.getElementById('profileLastName'),
+                    age: document.getElementById('profileAge')
+                };
+
+                // Update only elements that exist
+                if (profileElements.name) {
+                    profileElements.name.textContent = `${data.profile.firstName || ''} ${data.profile.lastName || ''}`.trim() || 'Guest';
+                }
+                if (profileElements.firstName) {
+                    profileElements.firstName.textContent = data.profile.firstName || '-';
+                }
+                if (profileElements.middleInitial) {
+                    profileElements.middleInitial.textContent = data.profile.middleInitial || '-';
+                }
+                if (profileElements.lastName) {
+                    profileElements.lastName.textContent = data.profile.lastName || '-';
+                }
+                if (profileElements.age) {
+                    profileElements.age.textContent = data.profile.age || '-';
+                }
+
+                // Update profile view if it exists
+                const profileView = document.getElementById('profileView');
+                if (profileView) {
+                    profileView.innerHTML = `
+                        <div class="profile-info">
+                            <div class="profile-info-item">
+                                <span class="profile-info-label">First Name:</span>
+                                <span>${data.profile.firstName || '-'}</span>
+                            </div>
+                            <div class="profile-info-item">
+                                <span class="profile-info-label">Middle Initial:</span>
+                                <span>${data.profile.middleInitial || '-'}</span>
+                            </div>
+                            <div class="profile-info-item">
+                                <span class="profile-info-label">Last Name:</span>
+                                <span>${data.profile.lastName || '-'}</span>
+                            </div>
+                            <div class="profile-info-item">
+                                <span class="profile-info-label">Age:</span>
+                                <span>${data.profile.age || '-'}</span>
+                            </div>
+                        </div>`;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading profile:', error);
+        }
+    }
+
+    // Profile edit modal handlers
+    const editProfileBtn = document.getElementById('editProfileBtn');
+    const profileEditModal = document.getElementById('profileEditModal');
+    const closeProfileEdit = document.getElementById('closeProfileEdit');
+    
+    editProfileBtn.addEventListener('click', () => {
+        profileEditModal.style.display = 'flex';
+    });
+    
+    closeProfileEdit.addEventListener('click', () => {
+        profileEditModal.style.display = 'none';
+    });
+    
+    // Handle profile form submission
+    document.getElementById('profileEditForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        let formData;
+        
+        try {
+            const user = auth.currentUser;
+            if (!user) throw new Error('No user logged in');
+
+            const userRef = doc(db, 'users', user.uid);
+            const userDoc = await getDoc(userRef);
+            const existingData = userDoc.exists() ? userDoc.data() : {};
+            
+            // Safely read optional fields that may not exist in the form
+            const teacherCodeEl = document.getElementById('teacherCode');
+
+            formData = {
+                firstName: document.getElementById('firstName').value,
+                middleInitial: document.getElementById('middleInitial').value,
+                lastName: document.getElementById('lastName').value,
+                age: document.getElementById('age').value,
+                teacherCode: teacherCodeEl ? teacherCodeEl.value : (existingData.teacherCode || ''),
+                email: user.email,
+                // Preserve existing data
+                moduleProgress: existingData.moduleProgress || {},
+                role: existingData.role || 'student',
+                updatedAt: serverTimestamp(),
+                lastLogin: existingData.lastLogin || serverTimestamp()
+            };
+        } catch (error) {
+            console.error('Error preparing profile data:', error);
+            alert('Failed to prepare profile data');
+            return;
+        }
+
+        try {
+            const user = auth.currentUser;
+            if (!user) throw new Error('No user logged in');
+
+            const userRef = doc(db, 'users', user.uid);
+            await updateDoc(userRef, {
+                ...formData,
+                updatedAt: serverTimestamp()
+            });
+
+            alert('Profile updated successfully!');
+            profileEditModal.style.display = 'none';
+            loadProfileData(); // Refresh the profile view
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            alert('Failed to update profile');
+        }
+    });
+
+    // Handle teacher connection
+    const connectTeacherBtn = document.getElementById('connectTeacherBtn');
+    if (connectTeacherBtn) {
+        connectTeacherBtn.addEventListener('click', async () => {
+            const code = document.getElementById('teacherCodeInput').value.trim().toUpperCase();
+        const errorElement = document.getElementById('teacherConnectError');
+        const successElement = document.getElementById('teacherConnectSuccess');
+        
+        if (!code) {
+            errorElement.textContent = 'Please enter a teacher code';
+            successElement.textContent = '';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/student/connect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ teacher_code: code })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                successElement.textContent = 'Successfully connected to teacher!';
+                errorElement.textContent = '';
+                document.getElementById('teacherCodeInput').value = '';
+                
+                if (result.teacher_name) {
+                    document.getElementById('currentTeacher').textContent = `Connected to: ${result.teacher_name}`;
+                    document.getElementById('currentTeacher').style.display = 'block';
+                }
+            } else {
+                errorElement.textContent = result.error || 'Failed to connect to teacher';
+                successElement.textContent = '';
+            }
+        } catch (error) {
+            errorElement.textContent = 'Failed to connect to teacher';
+            successElement.textContent = '';
+        }
+        });
+    }
+
+    const progressBtn = document.getElementById('progressBtn');
+    if (progressBtn) {
+         progressBtn.addEventListener('click', function(e) {
+             e.stopPropagation();
+             openProgressPopup();
+             if (profileModal) profileModal.style.display = 'none';
+         });
+     }
+    
+    // Load profile data when profile modal opens
+    document.getElementById('navProfile').addEventListener('click', loadProfileData);
+    // Bottom nav wiring
+    const navProgress = document.getElementById('navProgress');
+    const navProfile = document.getElementById('navProfile');
+    if (navProgress) navProgress.addEventListener('click', () => { openProgressPopup(); if (profileModal) profileModal.style.display='none'; });
+    if (navProfile) navProfile.addEventListener('click', async () => { await openAchievements(); if (profileModal) profileModal.style.display='none'; });
+    // Ensure close handlers for the progress overlay
+    const progressCloseIcon = document.querySelector('#progressOverlay .close-btn');
+    if (progressCloseIcon) {
+        progressCloseIcon.addEventListener('click', function(){ closeProgressPopup(); });
+    }
+    const closeProgressButton = document.getElementById('closeProgressPanel');
+    if (closeProgressButton) {
+        closeProgressButton.addEventListener('click', function(){ closeProgressPopup(); });
+    }
+    const progressOverlay = document.getElementById('progressOverlay');
+    if (progressOverlay) {
+        progressOverlay.addEventListener('click', function(e){
+            if (e.target === progressOverlay) { closeProgressPopup(); }
+        });
+    }
+    
+    // Teacher resource functions
+    async function fetchTeacherResources() {
+        try {
+            const response = await fetch('/api/teacher/resources');
+            const data = await response.json();
+            const resourceList = document.getElementById('resourceList');
+            
+            resourceList.innerHTML = data.resources.map(resource => `
+                <a href="${resource.url}" class="resource-item" target="_blank">
+                    <i class="fas fa-${getFileIcon(resource.type)}"></i>
+                    <span>${resource.name}</span>
+                </a>
+            `).join('');
+            
+            resourceList.classList.toggle('show');
+        } catch (error) {
+            console.error('Error fetching resources:', error);
+        }
+    }
+
+    async function fetchClassActivities() {
+        try {
+            const response = await fetch('/api/teacher/activities');
+            const data = await response.json();
+            const activityList = document.getElementById('activityList');
+            
+            activityList.innerHTML = data.activities.map(activity => `
+                <a href="${activity.url}" class="activity-item">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>${activity.name}</span>
+                </a>
+            `).join('');
+            
+            activityList.classList.toggle('show');
+        } catch (error) {
+            console.error('Error fetching activities:', error);
+        }
+    }
+
+    async function fetchTeacherUploads() {
+        try {
+            const response = await fetch('/api/teacher/uploads');
+            const data = await response.json();
+            const uploadsList = document.getElementById('uploadsList');
+            
+            uploadsList.innerHTML = data.uploads.map(upload => `
+                <a href="${upload.url}" class="resource-item" target="_blank">
+                    <i class="fas fa-${getFileIcon(upload.type)}"></i>
+                    <span>${upload.name}</span>
+                    <small class="text-muted">${new Date(upload.date).toLocaleDateString()}</small>
+                </a>
+            `).join('');
+            
+            uploadsList.classList.toggle('show');
+        } catch (error) {
+            console.error('Error fetching uploads:', error);
+        }
+    }
+
+    function getFileIcon(type) {
+        const icons = {
+            pdf: 'file-pdf',
+            doc: 'file-word',
+            docx: 'file-word',
+            ppt: 'file-powerpoint',
+            pptx: 'file-powerpoint',
+            xlsx: 'file-excel',
+            default: 'file'
+        };
+        return icons[type] || icons.default;
+    }
+    // ...existing code...
+  });
+    </script>
+
+    <script>
+      function getBadgeIcon(name){
+        const key = (name||'').toString().toLowerCase();
+        if (key.includes('gold')) return '🥇';
+        if (key.includes('silver')) return '🥈';
+        if (key.includes('bronze')) return '🥉';
+        if (key.includes('star')) return '⭐';
+        if (key.includes('champ') || key.includes('winner')) return '🏆';
+        if (key.includes('progress')) return '📈';
+        return '🏅';
+      }
+
+      async function openAchievements(){
+        const modal = document.getElementById('achievementsModal');
+        const list = document.getElementById('achievementsList');
+        const empty = document.getElementById('achievementsEmpty');
+        try{
+          console.log('[Achievements] fetching /api/student/achievements ...');
+          const r = await fetch('/api/student/achievements', { credentials: 'same-origin' });
+          console.log('[Achievements] response status:', r.status);
+          const d = await r.json();
+          console.log('[Achievements] payload:', d);
+          let badges = Array.isArray(d.badges) ? d.badges.slice() : [];
+
+          // Also include current_badge from server if present
+          if (d.current_badge && d.current_badge !== 'none') {
+            const already = badges.some(b => (b && (b.name||b).toString().toLowerCase()) === String(d.current_badge).toLowerCase());
+            if (!already) {
+              badges.unshift({ name: String(d.current_badge), reason: 'Awarded by teacher', assigned_at: d.updated_at || null });
+              console.log('[Achievements] injected current_badge into list:', d.current_badge);
+            }
+          }
+
+          // Filter invalid/none and sort by assigned_at desc when available
+          badges = badges
+            .map(b => (typeof b === 'string' ? { name: b } : b))
+            .filter(b => b && b.name && String(b.name).toLowerCase() !== 'none')
+            .sort((a,b) => new Date(b.assigned_at || 0) - new Date(a.assigned_at || 0));
+          console.log('[Achievements] normalized badge count:', badges.length);
+
+          if (!badges.length){
+            console.warn('[Achievements] no badges to display');
+            empty.style.display = 'block';
+            list.innerHTML = '';
+          } else {
+            empty.style.display = 'none';
+            list.innerHTML = badges.map(b=>{
+              const n = (b.name||'').toString();
+              const when = b.assigned_at ? new Date(b.assigned_at).toLocaleString() : (d.updated_at ? new Date(d.updated_at).toLocaleString() : '');
+              const reason = (b.reason||'').toString();
+              return `<div style="display:flex;align-items:center;gap:10px;border:1px solid rgba(15,23,42,0.06);border-radius:10px;padding:10px;background:#fff">
+                        <div style="font-size:22px">${getBadgeIcon(n)}</div>
+                        <div style="flex:1">
+                          <div style="font-weight:700">${n || 'Badge'}</div>
+                          <div style="font-size:12px;color:var(--muted)">${reason}</div>
+                        </div>
+                        <div style="font-size:12px;color:var(--muted)">${when}</div>
+                      </div>`;
+            }).join('');
+          }
+        }catch(e){
+          console.error('[Achievements] fetch/render error:', e);
+          empty.style.display = 'block';
+          list.innerHTML = '';
+        }
+        modal.style.display = 'flex';
+        const closeBtn = document.getElementById('closeAchievements');
+        if (closeBtn){
+          closeBtn.onclick = ()=>{ modal.style.display = 'none'; };
+        }
+        modal.onclick = (e)=>{ if (e.target === modal) modal.style.display = 'none'; };
+      }
+    </script>
+
+    <!-- Menu progress enforcement removed: server enforces pre-quiz redirects now -->
+    <script>
+      // Pre-quiz routing removed from client to avoid duplicate/fragile checks.
+      // Server (Flask) performs canonical enforcement; keep client-side UI only.
+      console.log('Menu client pre-quiz logic disabled; server enforces access to modules.');
+    </script>
+  {% endblock %}
+  <script>
+      (async function(){
+        try {
+          const resp = await fetch('/api/progress', { credentials: 'same-origin' });
+          if (!resp.ok) return;
+          const progress = await resp.json();
+
+          // Get age group from Firebase data in localStorage
+          const storedProfile = localStorage.getItem('userProfile');
+          let ageG = null;
+          if (storedProfile) {
+              const profileData = JSON.parse(storedProfile);
+              ageG = profileData.ageGroup || profileData.age;
+              console.log('Using age group from stored profile:', ageG);
+          }
+
+          document.querySelectorAll('.module-card').forEach(card => {
+            const moduleAttr = card.getAttribute('data-module');
+            const href = card.getAttribute('href') || '';
+            const id = moduleAttr || (href.split('/').pop());
+            if (!id) return;
+
+            // Handle Adolescent Health Situation module visibility
+            if (id === '7') {
+              console.log('AHS Module Found - Current age group:', ageG);
+              // Check if age is 17-19 or single age value between 17-19
+              if (ageG === '17-19' || ageG === '17' || ageG === '18' || ageG === '19') {
+                console.log('AHS Module: Showing for age', ageG);
+                card.style.display = ''; // Show module for ages 17-19
+              } else {
+                console.log('AHS Module: Hiding for age', ageG);
+                card.style.display = 'none'; // Hide module for other ages
+                return; // Skip progress badge/redirect logic for hidden module
+              }
+            }
+
+            // Exclude non-lesson cards from badges and quiz redirects
+            const excluded = ['mini-games','class-activities','learning-materials'];
+            if (excluded.includes(id)) {
+              const existing = card.querySelector('.module-status-badge');
+              if (existing) existing.remove();
+              return;
+            }
+
+            const entry = (progress && (progress[id] || progress[String(id)])) || {};
+            const pre = entry && entry.pre_quiz_completed === true;
+            const post = entry && entry.post_quiz_completed === true;
+
+            // mark data attributes for debugging/other scripts
+            card.dataset.pre = pre ? 'true' : 'false';
+            card.dataset.post = post ? 'true' : 'false';
+
+            // ensure badge container exists
+            card.style.position = card.style.position || 'relative';
+            let badge = card.querySelector('.module-status-badge');
+            if (!badge) {
+              badge = document.createElement('div');
+              badge.className = 'module-status-badge';
+              badge.style.cssText = 'position:absolute;right:12px;top:12px;padding:6px 8px;border-radius:10px;background:rgba(255,255,255,0.9);font-weight:700;font-size:0.8rem;border:1px solid rgba(15,23,42,0.04);pointer-events:none';
+              card.appendChild(badge);
+            }
+
+            // Apply states
+            if (post) {
+              badge.textContent = '✓';
+              badge.style.cssText = 'position:absolute;top:15px;right:15px;background:var(--success,#4ecdc4);color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold;';
+              card.style.opacity = '0.7';
+              card.setAttribute('aria-disabled', 'true');
+              // prevent navigation on completed modules
+              card.addEventListener('click', function(e){ e.preventDefault(); }, { passive: true });
+            } else if (!pre) {
+              badge.textContent = '!';
+              badge.style.cssText = 'position:absolute;top:15px;right:15px;background:var(--accent,#667eea);color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold;';
+              badge.style.pointerEvents = 'auto';
+              // redirect to pre-quiz when user clicks
+              const handler = (e) => {
+                e.preventDefault();
+                window.location.href = `/quiz/${id}/pre`;
+              };
+              // remove previous one-time handlers to avoid duplicate redirects
+              card.removeEventListener('click', handler);
+              card.addEventListener('click', handler, { passive: true });
+            } else {
+              // clean up badge if neutral
+              badge.remove();
+            }
+          });
+        } catch (err) {
+          console.warn('Failed to sync module progress:', err);
+        }
+      })();
+    </script>
+
+  </body>
+</html>

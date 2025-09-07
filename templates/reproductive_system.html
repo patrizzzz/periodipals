@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reproductive System Learning Material</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/reproductive_sytem.css">
+    <style>
+        .music-player {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 15px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        .music-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #667eea;
+            transition: transform 0.3s ease;
+        }
+        .music-toggle:hover {
+            transform: scale(1.1);
+        }
+        .volume-control {
+            width: 80px;
+            display: none;
+        }
+        .music-player:hover .volume-control {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="music-player">
+        <button id="musicToggle" class="music-toggle">🎵</button>
+        <input type="range" id="volumeSlider" class="volume-control" min="0" max="100" value="50">
+    </div>
+    <audio id="bgMusic" loop>
+        <source src="/static/audio/musicbg.mp3" type="audio/mp3">
+    </audio>
+    <a href="/menu" class="back-btn" style="position: fixed; left: 20px; top: 20px; z-index: 1000; background: #48bb78; color: white; padding: 12px 28px; border-radius: 25px; font-weight: 600; text-decoration: none; box-shadow: 0 4px 12px rgba(16,185,129,0.15);">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <!-- Mascot Container -->
+    <div class="mascot-container" style="position: fixed; bottom: 30px; left: 30px; right: unset; z-index: 1000; display: flex; flex-direction: column; align-items: flex-start;">
+        <div class="speech-bubble" style="font-size:2.2rem; display:block;">
+            <div class="bubble-title">✨ Welcome! ✨</div>
+            <div class="bubble-text">Let's explore your amazing body! 🧬💡🔍<br>Click on any part to learn more! 😃🎉</div>
+        </div>
+        <div class="mascot-sprite" data-bg-size="400% 100%"></div>
+    </div>
+
+    <div class="container">
+        <!-- Breadcrumbs -->
+        <div class="breadcrumbs">
+            <a href="/menu">Menu</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Reproductive System</span>
+        </div>
+
+        <div class="header">
+            <h1>🧬 Human Reproductive System</h1>
+            <p>Interactive Learning Experience</p>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section">
+            <div class="progress-header">
+                <h2 class="progress-title"><i class="fas fa-chart-line"></i> Your Learning Progress</h2>
+                <span class="progress-counter"><span id="progressCount">0%</span> Complete</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="complete-section" id="completeSection" style="display: none;">
+                <button class="complete-btn" id="completeBtn">
+                    <i class="fas fa-trophy"></i> Complete Learning Journey!
+                </button>
+            </div>
+        </div>
+
+        <div class="system-selector">
+            <button class="system-btn active" data-system="female">Female System</button>
+            <button class="system-btn" data-system="male">Male System</button>
+        </div>
+
+        <div class="learning-card">
+            <div class="card-content">
+                <div class="left-panel">
+                    <div class="panel-title">External Parts</div>
+                    <div id="external-parts"></div>
+                </div>
+
+            <div class="image-panel">
+                <div class="image-overlay">
+                    <h3>🌟 Let's Learn Together!</h3>
+                    <p>Click on different parts to discover how amazing your body is!</p>
+                    <div class="emoji-guide">🔍 ✨ 💫</div>
+                </div>
+                <div class="anatomy-container">
+                    <img src="/static/img/femaleR.png" alt="Female Reproductive System" class="anatomy-image female-system">
+                    <img src="/static/img/maleR.jpg" alt="Male Reproductive System" class="anatomy-image male-system">
+                </div>
+                <div class="fun-fact-box">
+                    <span class="fun-fact-icon">💡</span>
+                    <p class="fun-fact-text">Did you know? Your body is like a super cool machine that helps you grow and stay healthy!</p>
+                </div>
+            </div>                <div class="right-panel">
+                    <div class="panel-title">Internal Parts</div>
+                    <div id="internal-parts"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        /* Progress Section Styles */
+        .progress-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-counter {
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.8s ease;
+        }
+
+        .complete-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .complete-btn {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 auto;
+        }
+
+        .complete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(72, 187, 120, 0.3);
+        }
+
+        .post-quiz-card {
+            max-width: 700px;
+            margin: 50px auto;
+            background: linear-gradient(135deg, #fdfbfb, #ebedee);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            padding: 40px 30px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .post-quiz-title {
+            font-size: 2rem;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .post-quiz-desc {
+            font-size: 1.1rem;
+            color: #4a5568;
+            margin-bottom: 30px;
+        }
+
+        .quiz-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .quiz-btn,
+        .skip-btn {
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            color: white;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            box-shadow: 0 8px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .quiz-btn:hover,
+        .skip-btn:hover {
+            background: linear-gradient(135deg, #6b46c1, #4c51bf);
+            transform: translateY(-2px);
+        }
+
+        .skip-btn {
+            background: linear-gradient(135deg, #a0aec0, #718096);
+        }
+
+        .skip-btn:hover {
+            background: linear-gradient(135deg, #718096, #4a5568);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+    {% if post_quiz_available %}
+    <div class="post-quiz-card">
+        <h2 class="post-quiz-title">🎓 Test Your Knowledge</h2>
+        <p class="post-quiz-desc">Take the post-quiz to see what you've learned from this module!</p>
+
+        <div class="quiz-options">
+            <a href="/quiz/2/post" class="quiz-btn" type="button">Take Post-Quiz</a>
+            <a href="/menu" class="skip-btn" type="button">Skip & Return to Menu</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <script>
+        document.querySelector('.quiz-btn').addEventListener('click', function () {
+            localStorage.setItem('returnToModule', '{{ module_id }}');
+        });
+    </script>
+    <script src="/static/js/reproductive_sytem.js"></script>
+    <script type="module" src="/static/js/mascot.js"></script>
+    <script type="module" src="/static/js/chatbot.js"></script>
+</body>
+</html>

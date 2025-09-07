@@ -1,0 +1,381 @@
+/* Base Activity Styles */
+.activity-container {
+    max-width: 900px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.activity-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.activity-header h1 {
+    font-size: 2.2rem;
+    color: #2d3748;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.activity-description {
+    font-size: 1.1rem;
+    color: #718096;
+    max-width: 700px;
+    margin: 0 auto 20px;
+}
+
+/* Progress Bar */
+.activity-progress {
+    margin: 30px 0;
+}
+
+.progress-bar {
+    height: 8px;
+    background-color: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4299e1, #38b2ac);
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 4px;
+}
+
+.progress-text {
+    text-align: center;
+    color: #718096;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Activity Content */
+.activity-content {
+    min-height: 400px;
+    margin: 30px 0;
+    position: relative;
+}
+
+/* Navigation Buttons */
+.activity-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.nav-btn {
+    padding: 12px 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #edf2f7;
+    color: #4a5568;
+}
+
+.nav-btn:hover {
+    background: #e2e8f0;
+}
+
+.nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.prev-btn {
+    margin-right: auto;
+}
+
+.next-btn {
+    margin-left: auto;
+}
+
+.submit-btn {
+    padding: 12px 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    background: #48bb78;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-left: 15px;
+}
+
+.submit-btn:hover {
+    background: #38a169;
+}
+
+.submit-btn:disabled {
+    background: #cbd5e0;
+    cursor: not-allowed;
+}
+
+/* Feedback Modal */
+.feedback-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    animation: slideUp 0.3s;
+}
+
+.modal-header {
+    padding: 20px;
+    background: linear-gradient(135deg, #4299e1, #38b2ac);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0 10px;
+}
+
+.modal-body {
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.modal-body p {
+    font-size: 1.1rem;
+    color: #4a5568;
+    margin-bottom: 20px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: center;
+    padding: 15px;
+    background: #f7fafc;
+    gap: 15px;
+}
+
+.modal-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid #e2e8f0;
+    background: white;
+    color: #4a5568;
+    transition: all 0.2s;
+}
+
+.modal-btn.primary {
+    background: #4299e1;
+    border-color: #4299e1;
+    color: white;
+}
+
+.modal-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Activity Types */
+/* Matching Game */
+.matching-game {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.match-item {
+    background: #f7fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.match-item:hover {
+    background: #ebf8ff;
+    border-color: #90cdf4;
+}
+
+.match-item.selected {
+    background: #ebf8ff;
+    border-color: #4299e1;
+    color: #2b6cb0;
+}
+
+.match-item.correct {
+    background: #f0fff4;
+    border-color: #9ae6b4;
+    color: #2f855a;
+}
+
+.match-item.incorrect {
+    background: #fff5f5;
+    border-color: #feb2b2;
+    color: #c53030;
+}
+
+/* Drag and Drop (for mini-games/activities) */
+.drag-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.drag-item {
+    background: #f7fafc;
+    border: 2px dashed #cbd5e0;
+    border-radius: 8px;
+    padding: 15px;
+    cursor: move;
+    user-select: none;
+}
+
+.drop-zone {
+    min-height: 150px;
+    border: 2px dashed #a0aec0;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 15px 0;
+    transition: background 0.2s;
+}
+
+.drop-zone.highlight {
+    background: #ebf8ff;
+    border-color: #4299e1;
+}
+
+.drag-item.in-zone {
+    background: #ebf8ff;
+    border-style: solid;
+    border-color: #90cdf4;
+}
+
+.drag-feedback {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    display: none;
+}
+
+.correct-feedback {
+    background: #f0fff4;
+    border-left: 4px solid #48bb78;
+}
+
+.incorrect-feedback {
+    background: #fff5f5;
+    border-left: 4px solid #f56565;
+}
+
+/* Sequencing Activity */
+.sequence-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sequence-item {
+    background: #f7fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 15px;
+    cursor: move;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sequence-item:hover {
+    background: #ebf8ff;
+}
+
+.sequence-handle {
+    cursor: move;
+    color: #718096;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes confetti {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .activity-container {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .activity-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .activity-footer {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .nav-btn, .submit-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adolescent Health Awareness</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/AHS.css">
+</head>
+<body>
+    <!-- Floating Particles -->
+    <div class="floating-particles" id="particles"></div>
+
+    <div class="container">
+        <!-- Breadcrumbs -->
+        <div class="breadcrumbs">
+            <a href="/menu"><i class="fas fa-home"></i> Home</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Adolescent Health Situation</span>
+        </div>
+
+        <!-- Navigation -->
+        <div class="top-nav">
+            <a href="/menu" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Menu
+            </a>
+            
+            <div class="nav-controls">
+                <!-- Music Player -->
+                <div class="music-player">
+                    <button id="musicToggle" class="music-toggle" aria-label="Toggle music">
+                        <i class="fas fa-music"></i>
+                    </button>
+                    <input type="range" id="volumeSlider" class="volume-control" min="0" max="100" value="50" aria-label="Volume control">
+                </div>
+                
+                <!-- Resources Button -->
+                <button class="quiz-btn" id="resourcesBtn">
+                    <i class="fas fa-hands-helping"></i> Get Help
+                </button>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <h1 class="title">ADOLESCENT HEALTH SITUATION</h1>
+            <p class="subtitle">Understanding Health Challenges Among Filipino Youth (17-19 years old)</p>
+        </div>
+
+        <!-- Alert Banner -->
+        <div class="alert-banner">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Mental health concerns are rising: Suicide consideration increased from 11.6% to 23.1% (2015-2019)</span>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section">
+            <h2 style="color: white; margin-bottom: 15px; text-align: center;">
+                <i class="fas fa-chart-line"></i> Learning Progress
+            </h2>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="learningProgress"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progressText">0 of 6 topics explored</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+            </div>
+            <div class="complete-section" id="completeSection" style="display: none;">
+                <button class="complete-btn" id="completeBtn">
+                    <i class="fas fa-trophy"></i> Complete Learning Journey!
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-overview">
+            <h2 style="color: white; margin-bottom: 20px; text-align: center;">
+                <i class="fas fa-chart-pie"></i> Key Statistics Overview
+            </h2>
+            <p style="color: #e0e0e0; text-align: center; margin-top: 15px;">
+                These statistics represent real challenges faced by Filipino adolescents today.
+            </p>
+        </div>
+
+        <!-- Health Cards Grid -->
+        <div class="health-grid">
+            <!-- Mental Health Card -->
+            <div class="health-card" data-message="mental-health" data-topic="mental-health" onclick="markAsRead(this); setMascotState('explaining'); showSpeechBubble('mental-health')">
+                <div class="read-indicator" id="indicator-mental-health">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="card-image">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="card-content-wrapper">
+                    <h3 class="card-title">Mental Health Crisis</h3>
+                    <div class="card-content">
+                        Suicide attempts increased from <span class="stat-highlight">16.8%</span> to <span class="stat-highlight">24.3%</span>
+                        <br><br>
+                        <strong>23.1%</strong> of 13-17 year-olds seriously considered suicide in 2019
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risky Behaviors Card -->
+            <div class="health-card" data-message="risky-behaviors" data-topic="risky-behaviors" onclick="markAsRead(this); setMascotState('pointing'); showSpeechBubble('risky-behaviors')">
+                <div class="read-indicator" id="indicator-risky-behaviors">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="card-image">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="card-content-wrapper">
+                    <h3 class="card-title">Risky Behaviors</h3>
+                    <div class="card-content">
+                        <strong>Smoking:</strong> <span class="stat-highlight">41% boys</span>, <span class="stat-highlight">9% girls</span>
+                        <br>
+                        <strong>Alcohol:</strong> <span class="stat-highlight">55% boys</span>, <span class="stat-highlight">23% girls</span>
+                        <br>
+                        <strong>Drug use:</strong> 5% boys, 0.3% girls
+                    </div>
+                </div>
+            </div>
+
+            <!-- Malnutrition Card -->
+            <div class="health-card" data-message="malnutrition" data-topic="malnutrition" onclick="markAsRead(this); setMascotState('happy'); showSpeechBubble('malnutrition')">
+                <div class="read-indicator" id="indicator-malnutrition">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="card-image">
+                    <i class="fas fa-apple-alt"></i>
+                </div>
+                <div class="card-content-wrapper">
+                    <h3 class="card-title">Malnutrition Issues</h3>
+                    <div class="card-content">
+                        <span class="stat-highlight">1 in 10</span> Filipino adolescents are overweight
+                        <br><br>
+                        Poor health-seeking behavior increases vulnerability to diseases
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menstrual Health Card -->
+            <div class="health-card" data-message="menstrual-health" data-topic="menstrual-health" onclick="markAsRead(this); setMascotState('explaining'); showSpeechBubble('menstrual-health')">
+                <div class="read-indicator" id="indicator-menstrual-health">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="card-image" style="background: linear-gradient(45deg, #fd79a8, #e84393);">
+                    <i class="fas fa-female"></i>
+                </div>
+                <div class="card-content-wrapper">
+                    <h3 class="card-title">Menstrual Health & Hygiene</h3>
+                    <div class="card-content">
+                        Many adolescent girls lack access to proper menstrual products and education
+                        <br><br>
+                        <strong>Menstrual health</strong> is essential for overall well-being and school attendance
+                    </div>
+                </div>
+            </div>
+
+            <!-- Substance Use Card -->
+            <div class="health-card" data-message="substance-use" data-topic="substance-use" onclick="markAsRead(this); setMascotState('pointing'); showSpeechBubble('substance-use')">
+                <div class="read-indicator" id="indicator-substance-use">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="card-image">
+                    <i class="fas fa-pills"></i>
+                </div>
+                <div class="card-content-wrapper">
+                    <h3 class="card-title">Substance Use & Alcohol</h3>
+                    <div class="card-content">
+                        Alcohol consumption is significantly higher among boys
+                        <br><br>
+                        Early substance use can lead to long-term health consequences
+                    </div>
+                </div>
+            </div>
+
+            <!-- Violence Exposure Card -->
+            <div class="health-card" data-message="violence" data-topic="violence" onclick="markAsRead(this); setMascotState('explaining'); showSpeechBubble('violence')">
+                <div class="read-indicator" id="indicator-violence">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="card-image">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="card-content-wrapper">
+                    <h3 class="card-title">Violence Exposure</h3>
+                    <div class="card-content">
+                        Many adolescents experience various forms of violence
+                        <br><br>
+                        This impacts mental health and overall well-being
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Section -->
+        <div class="interactive-section">
+            <h2 style="color: white; margin-bottom: 20px;">
+                <i class="fas fa-lightbulb"></i> Take Action
+            </h2>
+            <p style="color: #e0e0e0; margin-bottom: 30px; font-size: 1.1rem;">
+                Addressing these issues requires comprehensive strategies to promote adolescent health and well-being.
+            </p>
+            
+            <div class="action-buttons">
+                <button class="quiz-btn" onclick="window.location.href='/quiz/7/post'">
+                    <i class="fas fa-brain"></i> Test Your Knowledge
+                </button>
+                
+                <button class="quiz-btn" id="resourcesBtn2">
+                    <i class="fas fa-hands-helping"></i> Get Help Resources
+                </button>
+                
+                <button class="quiz-btn" id="shareBtn">
+                    <i class="fas fa-share-alt"></i> Share Awareness
+                </button>
+            </div>
+        </div>
+
+        <!-- Mascot Container -->
+        <div class="mascot-container">
+            <div class="speech-bubble" id="mascotSpeech">
+                Hi! I'm Peri, your friendly guide. Click any card to learn about health challenges and how to stay strong! 💪
+            </div>
+            <div class="mascot-sprite" id="mascotSprite" title="Click me for a tip!">
+            </div>
+        </div>
+    </div>
+
+    <!-- Resource Modal -->
+    <div class="modal" id="resourcesModal">
+        <div class="modal-content">
+            <button class="close" id="closeResources">×</button>
+            <h2 style="color: var(--primary); margin-bottom: 18px;">
+                <i class="fas fa-hands-helping"></i> Help Resources
+            </h2>
+            <ul style="list-style: none; padding: 0;">
+                <li style="margin-bottom: 18px;">
+                    <strong>National Center for Mental Health:</strong> <br>
+                    <a href="tel:1553" style="color: var(--primary-dark); text-decoration: none;">
+                        <i class="fas fa-phone"></i> Call 1553
+                    </a> (24/7 Crisis Hotline)
+                </li>
+                <li style="margin-bottom: 18px;">
+                    <strong>Hopeline PH:</strong> <br>
+                    <a href="tel:0917-558-4673" style="color: var(--primary-dark); text-decoration: none;">
+                        <i class="fas fa-phone"></i> 0917-558-4673
+                    </a> (Mental Health Support)
+                </li>
+                <li style="margin-bottom: 18px;">
+                    <strong>Child Helpline:</strong> <br>
+                    <a href="tel:1383" style="color: var(--primary-dark); text-decoration: none;">
+                        <i class="fas fa-phone"></i> 1383
+                    </a> (Child Protection)
+                </li>
+                <li style="margin-bottom: 18px;">
+                    <strong>Department of Health:</strong> <br>
+                    <a href="https://doh.gov.ph" target="_blank" style="color: var(--primary-dark); text-decoration: none;">
+                        <i class="fas fa-globe"></i> doh.gov.ph
+                    </a>
+                </li>
+                <li style="margin-bottom: 18px;">
+                    <i class="fas fa-users"></i> <strong>Talk to a trusted adult, teacher, or school counselor</strong>
+                </li>
+            </ul>
+            <p style="color: var(--gray); margin-top: 20px;">
+                <i class="fas fa-heart"></i> You are not alone. Help is available and reaching out is a sign of strength!
+            </p>
+        </div>
+    </div>
+    <script type="module" src="/static/js/mascot.js"></script>
+    <script type="module" src="/static/js/chatbot.js"></script>
+    <script src="/static/js/AHS.js"></script>
+</body>
+</html>

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Materials - PeriodiPal</title>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7j5oSrNFAHHIfLQZvEh-VRg_OVqQ4EQ4",
+            authDomain: "menstrual-hygiene-manage-6b0ed.firebaseapp.com",
+            projectId: "menstrual-hygiene-manage-6b0ed",
+            storageBucket: "menstrual-hygiene-manage-6b0ed.firebasestorage.app",
+            messagingSenderId: "1002865022115",
+            appId: "1:1002865022115:web:ab79150f8a8d82e9171b16",
+            measurementId: "G-SSCG3ZV148"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        window.db = db;
+        window.auth = auth;
+        window.storage = storage;
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/learning_materials.css">
+    <link rel="stylesheet" href="/static/css/breadcrumbs.css">
+</head>
+<body>
+    <!-- Top Navigation -->
+    <header class="top-nav" style="position: sticky; top: 0; z-index: 50; display:flex; justify-content: space-between; align-items:center; padding:12px 16px; background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); border-bottom: 1px solid #e5e7eb;">
+        <a href="/menu" class="back-btn" style="display:flex; align-items:center; gap:8px; text-decoration:none; color:#111827; font-weight:600;">
+            <i class="fas fa-arrow-left"></i> Back to Menu
+        </a>
+        <div style="font-weight:600; color:#374151;">Learning Materials</div>
+        <div style="width:90px;"></div>
+    </header>
+    <!-- Teacher Code Modal -->
+    <div id="teacherCodeDialog" class="modal">
+        <div class="modal-content">
+            <div class="question-box">
+                <h2>What is Puberty?</h2>
+                <p>Puberty is a natural transformation that happens to everyone! As your body starts changing from a child's to an adult's - you're becoming the amazing person you're meant to be.</p>
+                <div class="fun-fact">
+                    <div class="fact-header">Fun Fact!</div>
+                    <p>Did you know that puberty usually starts between ages 8-13 for girls? Every person is different, and each one's puberty is at a perfect time!</p>
+                </div>
+                <div class="emotional-changes">
+                    <h3>Emotional Changes</h3>
+                    <p>You might feel different emotions more strongly than before - this is super normal! Sometimes you might feel:</p>
+                    <div class="question-box">
+                        <p>What should you do when you feel overwhelmed by emotions?</p>
+                        <div class="options">
+                            <label><input type="radio" name="emotions"> Talk to someone you trust</label>
+                            <label><input type="radio" name="emotions"> Take deep breaths and rest</label>
+                            <label><input type="radio" name="emotions"> Remember it's all natural</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #fff;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 20px;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .question-box {
+            background: linear-gradient(180deg, #E0B0FF 0%, #B980FF 100%);
+            color: white;
+            padding: 30px;
+        }
+
+        .question-box h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .question-box p {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .fun-fact {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .fact-header {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .emotional-changes {
+            margin-top: 25px;
+        }
+
+        .emotional-changes h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .options label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .options label:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .options input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: white;
+        }
+
+        .quiz-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .quiz-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .question {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .option input[type="radio"],
+        .option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #B980FF;
+        }
+
+        .option.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .option.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .quiz-results {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+        }
+
+        .quiz-results p {
+            margin: 5px 0;
+            font-size: 1.2rem;
+        }
+
+        .btn-primary {
+            background: #B980FF;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #9B5FFF;
+            transform: translateY(-2px);
+        }
+    </style>
+
+    <div class="main-wrapper">
+        <!-- Breadcrumbs -->
+        <div class="breadcrumbs">
+            <div class="breadcrumb-item">
+                <i class="fas fa-home breadcrumb-icon"></i>
+                <a href="/menu">Menu</a>
+            </div>
+            <div class="breadcrumb-item active">
+                <i class="fas fa-book-open breadcrumb-icon"></i>
+                Learning Materials
+            </div>
+        </div>
+
+        <!-- Header Section -->
+        <div class="header-section">
+            <div class="container">
+                <div class="header-content">
+                    <div class="header-text">
+                        <h1><i class="fas fa-graduation-cap"></i> Learning Materials</h1>
+                        <p>Access your teacher's resources and study materials</p>
+                    </div>
+                    <div class="header-visual">
+                        <div class="floating-icon">
+                            <i class="fas fa-books"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Stats Cards -->
+            <div class="stats-section">
+                <div class="stat-card total-resources">
+                    <div class="stat-content">
+                        <div class="stat-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total Resources</h3>
+                            <div class="value" id="totalResources">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-wave"></div>
+                </div>
+                
+                <div class="stat-card materials-read">
+                    <div class="stat-content">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Materials Read</h3>
+                            <div class="value" id="materialsRead">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-wave"></div>
+                </div>
+                
+                <div class="stat-card progress-card">
+                    <div class="stat-content">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Progress</h3>
+                            <div class="value" id="progressPercent">0%</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls Section -->
+            <div class="controls-section">
+                <div class="search-container">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search materials...">
+                        <div class="search-highlight"></div>
+                    </div>
+                </div>
+                
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label>
+                            <i class="fas fa-filter"></i>
+                            <select id="filterSelect">
+                                <option value="all">All Types</option>
+                                <option value="pdf">PDFs</option>
+                                <option value="video">Videos</option>
+                                <option value="link">Links</option>
+                            </select>
+                        </label>
+                        
+                        <label>
+                            <i class="fas fa-sort"></i>
+                            <select id="sortSelect">
+                                <option value="date">Date Added</option>
+                                <option value="title">Title</option>
+                                <option value="type">Type</option>
+                            </select>
+                        </label>
+                    </div>
+                    
+                    <div class="view-toggle">
+                        <button id="gridView" class="view-btn active" title="Grid View">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button id="listView" class="view-btn" title="List View">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Materials Container -->
+            <div id="materialsContainer" class="materials-grid">
+                <!-- Loading State -->
+                <div id="loadingState" class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Loading materials...</p>
+                </div>
+                
+                <!-- Resource Cards -->
+                <template id="resourceCardTemplate">
+                    <div class="material-card">
+                        <div class="material-badge"></div>
+                        <div class="material-icon">
+                            <i class="fas"></i>
+                        </div>
+                        <h3 class="material-title"></h3>
+                        <p class="material-description"></p>
+                        <div class="material-meta">
+                            <span class="material-date"></span>
+                            <span class="material-type"></span>
+                        </div>
+                        <div class="material-footer">
+                            <button class="btn btn-primary view-material">
+                                <i class="fas fa-eye"></i> View Material
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="empty-state">
+                <div class="empty-illustration">
+                    <i class="fas fa-books"></i>
+                    <div class="empty-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                <div class="empty-content">
+                    <h3>No Materials Found</h3>
+                    <p>Connect with your teacher to access learning materials and start your learning journey</p>
+                    <button id="connectTeacherBtn" class="btn btn-primary" onclick="document.getElementById('teacherCodeDialog').style.display = 'flex'">
+                        <i class="fas fa-plus"></i> Connect Teacher
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <style>
+    
+    </style>
+
+    <script type="module" src="/static/js/learning_materials.js"></script>
+</body>
+</html>

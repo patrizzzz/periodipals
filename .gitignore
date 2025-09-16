@@ -1,5 +1,7 @@
 # Firebase credentials
 *firebase-adminsdk*.json
+*serviceAccount*.json
+firebase-config.*
 
 # Python
 __pycache__/
@@ -7,23 +9,50 @@ __pycache__/
 *$py.class
 venv/
 env/
+*.pyc
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
 
 # Node
 node_modules/
 npm-debug.log
+yarn-debug.log*
+yarn-error.log*
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # Environment variables
 .env
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # System files 
 .DS_Store
 Thumbs.db
+*.tmp
+*.bak
 
 # Logs
 *.log
 logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

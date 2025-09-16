@@ -7,7 +7,7 @@ from routes.teacher_routes import teacher_bp
 from utils.database import init_db
 from utils.quiz_handler import convert_to_numeric_id
 import os
-from firebase_admin import credentials, initialize_app, firestore, auth
+from firebase_admin import credentials, initialize_app, firestore
 from dotenv import load_dotenv
 
 
@@ -89,14 +89,18 @@ class QuizApp:
 
     def init_firebase(self):
         """Initialize Firebase application"""
-        # Check if already initialized
-        if not len(credentials._cached_creds):
+        try:
+            # Check if Firebase is already initialized
+            self.db = firestore.client()
+        except:
+            # Initialize Firebase if not already initialized
             cred_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
             if not cred_path:
                 raise ValueError("GOOGLE_APPLICATION_CREDENTIALS environment variable not set")
+            
             cred = credentials.Certificate(cred_path)
             initialize_app(cred)
-        self.db = firestore.client()
+            self.db = firestore.client()
 
 
 # Initialize the application

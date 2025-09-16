@@ -333,3 +333,55 @@ document.addEventListener('keydown', function(e) {
         }
       }
     }
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/static/sw.js')
+      .then(registration => {
+        console.log('ServiceWorker registration successful');
+      })
+      .catch(err => {
+        console.log('ServiceWorker registration failed: ', err);
+      });
+  });
+}
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install button or prompt
+  showInstallPromotion();
+});
+
+function showInstallPromotion() {
+  // Create install button if not exists
+  if (!document.getElementById('installBtn')) {
+    const btn = document.createElement('button');
+    btn.id = 'installBtn';
+    btn.textContent = 'Install App';
+    btn.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 9999;
+    `;
+    btn.onclick = installApp;
+    document.body.appendChild(btn);
+  }
+}
+
+async function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  console.log(`User response to install prompt: ${outcome}`);
+  deferredPrompt = null;
+  document.getElementById('installBtn')?.remove();
+}

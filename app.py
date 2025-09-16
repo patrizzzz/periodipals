@@ -90,17 +90,43 @@ class QuizApp:
     def init_firebase(self):
         """Initialize Firebase application"""
         try:
-            # Check if Firebase is already initialized
+            # If already initialized, just use Firestore
             self.db = firestore.client()
         except:
-            # Initialize Firebase if not already initialized
-            cred_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
-            if not cred_path:
-                raise ValueError("GOOGLE_APPLICATION_CREDENTIALS environment variable not set")
-            
-            cred = credentials.Certificate(cred_path)
-            initialize_app(cred)
-            self.db = firestore.client()
+            try:
+                # --- Option A: Environment variables ---
+                if os.getenv("FIREBASE_PRIVATE_KEY"):
+                    cred_dict = {
+                        "type": "service_account",
+                        "project_id": os.getenv("FIREBASE_PROJECT_ID"),
+                        "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
+                        "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace("\\n", "\n"),
+                        "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
+                        "client_id": os.getenv("FIREBASE_CLIENT_ID"),
+                        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                        "token_uri": "https://oauth2.googleapis.com/token",
+                        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                        "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_CERT_URL"),
+                    }
+                    cred = credentials.Certificate(cred_dict)
+                    initialize_app(cred)
+                    print("✅ Firebase initialized using env vars")
+                
+                # --- Option B: JSON Secret File ---
+                else:
+                    cred_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+                    if not cred_path:
+                        raise ValueError("Neither FIREBASE_PRIVATE_KEY nor GOOGLE_APPLICATION_CREDENTIALS is set")
+
+                    cred = credentials.Certificate(cred_path)
+                    initialize_app(cred)
+                    print(f"✅ Firebase initialized using JSON file at {cred_path}")
+
+                self.db = firestore.client()
+
+            except Exception as e:
+                print("❌ Firebase initialization failed:", e)
+                raise
 
 
 # Initialize the application

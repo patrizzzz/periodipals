@@ -8,7 +8,8 @@ from utils.database import init_db
 from utils.quiz_handler import convert_to_numeric_id
 import os
 
-
+quiz_app = QuizApp()
+app = quiz_app.app 
 class QuizApp:
     """Quiz application class handling all quiz-related functionality"""
     

@@ -7,9 +7,16 @@
   "theme_color": "#ff4081",
   "icons": [
     {
-      "src": "/static/img/icon-192.png",
+      "src": "/static/img/teacher.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/img/teacherla.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

@@ -7,6 +7,7 @@ from routes.teacher_routes import teacher_bp
 from utils.database import init_db
 from utils.quiz_handler import convert_to_numeric_id
 import os
+from firebase_admin import credentials, initialize_app
 
 quiz_app = QuizApp()
 app = quiz_app.app 
@@ -20,6 +21,7 @@ class QuizApp:
         self._register_before_request()
         self._register_static_routes()
         self.register_error_handlers()
+        self.init_firebase()
 
     def _register_blueprints(self):
         """Register all blueprints"""

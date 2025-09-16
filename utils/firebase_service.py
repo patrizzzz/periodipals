@@ -9,12 +9,17 @@ def get_firestore():
     _ensure_app()
     return firestore.client()
 
-# Initialize Firebase Admin if not already initialized
 def _ensure_app():
     try:
         if not firebase_admin._apps:
-            # Prefer service account via env vars
-            if os.getenv("FIREBASE_PRIVATE_KEY"):
+            cred_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
+            if cred_path and os.path.exists(cred_path):
+                # Case 1: Use service account JSON file (local dev)
+                firebase_admin.initialize_app(credentials.Certificate(cred_path))
+
+            elif os.getenv("FIREBASE_PRIVATE_KEY"):
+                # Case 2: Use environment variables (Render, Heroku, etc.)
                 cred_dict = {
                     "type": "service_account",
                     "project_id": os.getenv("FIREBASE_PROJECT_ID"),
@@ -30,14 +35,15 @@ def _ensure_app():
                 firebase_admin.initialize_app(credentials.Certificate(cred_dict))
 
             else:
-                # Fallback: Application Default Credentials (rarely used on Render)
+                # Case 3: Fallback – ADC (Google Cloud Run, GAE)
                 try:
                     firebase_admin.initialize_app(credentials.ApplicationDefault())
                 except Exception:
+                    # Final fallback: initialize without explicit creds
                     firebase_admin.initialize_app()
 
     except ValueError:
-        # Already initialized, ignore
+        # Already initialized
         pass
     except Exception as e:
         print("Firebase initialization error:", e)

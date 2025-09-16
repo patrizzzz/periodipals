@@ -11,27 +11,36 @@ def get_firestore():
 
 # Initialize Firebase Admin if not already initialized
 def _ensure_app():
-    # Initialize the Firebase Admin app only once. If another part of the app
-    # has already initialized it, ignore the error and proceed.
     try:
         if not firebase_admin._apps:
-            # Prefer GOOGLE_APPLICATION_CREDENTIALS or ADC if available
-            cred_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
-            if cred_path and os.path.exists(cred_path):
-                firebase_admin.initialize_app(credentials.Certificate(cred_path))
+            # Prefer service account via env vars
+            if os.getenv("FIREBASE_PRIVATE_KEY"):
+                cred_dict = {
+                    "type": "service_account",
+                    "project_id": os.getenv("FIREBASE_PROJECT_ID"),
+                    "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
+                    "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace("\\n", "\n"),
+                    "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
+                    "client_id": os.getenv("FIREBASE_CLIENT_ID"),
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                    "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_CERT_URL")
+                }
+                firebase_admin.initialize_app(credentials.Certificate(cred_dict))
+
             else:
-                # Fall back to Application Default Credentials (e.g., Cloud Run/GAE)
+                # Fallback: Application Default Credentials (rarely used on Render)
                 try:
                     firebase_admin.initialize_app(credentials.ApplicationDefault())
                 except Exception:
-                    # Final fallback: initialize without explicit creds; may work in some envs
                     firebase_admin.initialize_app()
+
     except ValueError:
-        # App already initialized by another module/process; safe to ignore
+        # Already initialized, ignore
         pass
     except Exception as e:
-        # Print a helpful message but don't raise to keep server running
-        print('Firebase initialization error:', e)
+        print("Firebase initialization error:", e)
 
 def get_user_progress(uid: str):
     """Return the 'progress' sub-object for the given user id from Firestore.

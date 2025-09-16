@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ff4081">
   <title>Login - PeriodiPal</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="apple-touch-icon" href="/static/img/teacher.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/static/css/index.css">
   <style>
@@ -144,6 +147,9 @@
         <h1 class="app-title">PeriodiPal</h1>
       </div>
       <div class="welcome-subtitle">Your friendly guide to growing up! ✨</div>
+      <button id="installAppBtn" class="auth-btn" style="margin-top:10px; display:none;">
+        Install App
+      </button>
     </div>
 
     <div class="auth-form">
@@ -183,5 +189,36 @@
   </div>
 
   <script type="module" src="/static/js/index.js"></script>
+  <script>
+    (function() {
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/static/sw.js');
+        });
+      }
+
+      let deferredPrompt;
+      const installBtn = document.getElementById('installAppBtn');
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'inline-flex';
+      });
+
+      window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
+      });
+
+      installBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
+      });
+    })();
+  </script>
 </body>
 </html>

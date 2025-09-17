@@ -150,18 +150,48 @@ def get_connected_students():
         db = get_firestore()
         teacher_id = session.get('uid')
         
-        students = db.collection('users').where('teacher_id', '==', teacher_id).get()
-        student_list = []
+        # Primary: string schema
+        students_primary = db.collection('users').where('teacher_id', '==', teacher_id).get()
+        student_docs = list(students_primary)
         
-        for student in students:
-            student_data = student.to_dict()
+        # Fallback: legacy map schema where teacher_id is an object with 'id'
+        if not student_docs:
+            students_legacy = db.collection('users').where('teacher_id.id', '==', teacher_id).get()
+            student_docs = list(students_legacy)
+
+        student_list = []
+        for student in student_docs:
+            student_data = student.to_dict() or {}
+
+            # Backfill normalization: if teacher_id is an object, flatten to string id
+            try:
+                t_field = student_data.get('teacher_id')
+                if isinstance(t_field, dict) and t_field.get('id'):
+                    db.collection('users').document(student.id).set({
+                        'teacher_id': str(t_field.get('id')),
+                        'updated_at': firestore.SERVER_TIMESTAMP
+                    }, merge=True)
+            except Exception:
+                pass
+
+            # Normalize timestamp fields to ISO strings for safe JSON
+            last_login = student_data.get('lastLogin')
+            try:
+                last_login_iso = last_login.isoformat() if hasattr(last_login, 'isoformat') else (str(last_login) if last_login is not None else None)
+            except Exception:
+                last_login_iso = None
+
+            name = f"{student_data.get('firstName', '')} {student_data.get('lastName', '')}".strip()
+            if not name:
+                name = student_data.get('email', 'Unknown Student')
+
             student_list.append({
                 'id': student.id,
-                'name': f"{student_data.get('firstName', '')} {student_data.get('lastName', '')}".strip() or student_data.get('email', 'Unknown Student'),
+                'name': name,
                 'email': student_data.get('email'),
-                'lastActive': student_data.get('lastLogin', None),
+                'lastActive': last_login_iso,
                 'progress': student_data.get('progress', {}),
-                'age_group': student_data.get('age_group')
+                'age_group': student_data.get('age_group') or student_data.get('ageGroup')
             })
             
         return jsonify({
@@ -387,7 +417,9 @@ def get_teacher_resources():
         resources = []
         
         # If we have a teacher ID (either from student's teacher or current teacher)
-        teacher_id = student_teacher_id or uid
+        # Normalize legacy map objects to string id
+        t_id_raw = student_teacher_id or uid
+        teacher_id = t_id_raw.get('id') if isinstance(t_id_raw, dict) else t_id_raw
         print('Checking resources for teacher_id:', teacher_id)
         if teacher_id:
             query = resources_ref.where('teacher_id', '==', teacher_id)

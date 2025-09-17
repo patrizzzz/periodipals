@@ -215,7 +215,16 @@ def get_students_progress():
     try:
         db = get_firestore()
         teacher_id = session.get('uid')
-        students = db.collection('users').where('teacher_id', '==', teacher_id).get()
+        # Primary: string schema
+        students_primary = db.collection('users').where('teacher_id', '==', teacher_id).get()
+        student_docs = {s.id: s for s in students_primary}
+        # Fallback: legacy map schema (teacher_id.id == teacher_id)
+        try:
+            students_legacy = db.collection('users').where('teacher_id.id', '==', teacher_id).get()
+            for s in students_legacy:
+                student_docs[s.id] = s
+        except Exception:
+            pass
 
         def entry_to_percent(entry):
             try:
@@ -235,8 +244,18 @@ def get_students_progress():
             return 0
 
         results = []
-        for s in students:
+        for s in student_docs.values():
             data = s.to_dict() or {}
+            # Normalize legacy teacher_id map to string
+            try:
+                t_field = data.get('teacher_id')
+                if isinstance(t_field, dict) and t_field.get('id'):
+                    db.collection('users').document(s.id).set({
+                        'teacher_id': str(t_field.get('id')),
+                        'updated_at': firestore.SERVER_TIMESTAMP
+                    }, merge=True)
+            except Exception:
+                pass
             prog = data.get('moduleProgress') or data.get('progress') or {}
             modules = {}
             if isinstance(prog, dict):

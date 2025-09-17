@@ -229,13 +229,13 @@ def connect_student_teacher():
         teacher = teachers[0]
         teacher_data = teacher.to_dict()
 
-        # Update student's teacher_id
+        # Upsert student's teacher fields to avoid race/missing-doc issues
         student_ref = db.collection('users').document(session['uid'])
-        student_ref.update({
+        student_ref.set({
             'teacher_id': teacher.id,
             'teacher_name': teacher_data.get('email'),  # or name if available
             'connected_at': firestore.SERVER_TIMESTAMP
-        })
+        }, merge=True)
 
         return jsonify({
             'success': True,
@@ -1020,13 +1020,13 @@ def connect_to_teacher():
             
         teacher = teachers[0]
         
-        # Update student document with teacher reference
+        # Upsert student document with teacher reference (idempotent)
         student_ref = db.collection('users').document(student_uid)
-        student_ref.update({
+        student_ref.set({
             'teacher_id': teacher.id,
             'teacher_code': teacher_code,
             'updated_at': firestore.SERVER_TIMESTAMP
-        })
+        }, merge=True)
         
         return jsonify({
             'success': True,

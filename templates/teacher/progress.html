@@ -770,7 +770,8 @@ async function fetchStudentsProgress() {
     const response = await fetch('/api/teacher/students/progress');
     const data = await response.json();
     allStudents = (data && data.students) ? data.students : [];
-    
+    console.log(`Connected students: ${allStudents.length}`);
+    console.log('Student details:', allStudents);
     updateStats(allStudents);
     filterStudents(); // This will render the table
     

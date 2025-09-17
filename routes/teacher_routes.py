@@ -121,11 +121,12 @@ def validate_teacher_code():
         student_id = session.get('uid')
         if student_id and session.get('role') == 'student':
             student_ref = db.collection('users').document(student_id)
-            student_ref.update({
+            # Idempotent upsert to avoid failures when document doesn't exist
+            student_ref.set({
                 'teacher_id': teacher.id,
                 'teacher_code': teacher_data.get('teacher_code'),
                 'enrolled_at': firestore.SERVER_TIMESTAMP
-            })
+            }, merge=True)
         
         return jsonify({
             'success': True,

@@ -700,6 +700,8 @@ function renderStudentsTable(students) {
         <button class="btn-assign assign-badge" data-id="${student.id}">
           <i class="fas fa-award"></i> Assign
         </button>
+        <button class="btn-drop drop-student" data-id="${student.id}"><i class="fas fa-user-slash"></i> Drop</button>
+        <button class="btn-finish finish-student" data-id="${student.id}"><i class="fas fa-check-circle"></i> Finish</button>
       </td>
     `;
     
@@ -761,6 +763,53 @@ function renderStudentsTable(students) {
       }
     });
   });
+  // Drop student event
+  body.querySelectorAll('.drop-student').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const studentId = btn.getAttribute('data-id');
+      if (!confirm('Are you sure you want to drop this student?')) return;
+      try {
+        const resp = await fetch('/api/teacher/students/drop', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({student_id: studentId})
+        });
+        const data = await resp.json();
+        if(data.success) {
+          allStudents = allStudents.filter(s => s.id !== studentId);
+          filterStudents();
+        } else {
+          showToast('Failed to drop student', true);
+        }
+      } catch(e) {
+        showToast('Failed to drop student', true);
+      }
+    });
+  });
+  // Finish student event
+  body.querySelectorAll('.finish-student').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const studentId = btn.getAttribute('data-id');
+      if (!confirm('Mark all topics complete and finish student?')) return;
+      try {
+        const resp = await fetch('/api/teacher/students/finish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({student_id: studentId})
+        });
+        const data = await resp.json();
+        if(data.success) {
+          allStudents = allStudents.filter(s => s.id !== studentId);
+          filterStudents();
+          showToast('Student marked finished and badge awarded!');
+        } else {
+          showToast('Failed to finish student', true);
+        }
+      } catch(e) {
+        showToast('Failed to finish student', true);
+      }
+    });
+  });
 }
 
 async function fetchStudentsProgress() {
@@ -770,8 +819,7 @@ async function fetchStudentsProgress() {
     const response = await fetch('/api/teacher/students/progress');
     const data = await response.json();
     allStudents = (data && data.students) ? data.students : [];
-    console.log(`Connected students: ${allStudents.length}`);
-    console.log('Student details:', allStudents);
+    
     updateStats(allStudents);
     filterStudents(); // This will render the table
     

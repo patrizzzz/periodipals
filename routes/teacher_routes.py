@@ -206,6 +206,10 @@ def get_students_progress():
         results = []
         for s in students:
             data = s.to_dict() or {}
+            # --- Filter out students with status 'dropped' or 'finished' (Do not show on progress dashboard) ---
+            status = data.get('status', '').lower()
+            if status == 'dropped' or status == 'finished':
+                continue
             prog = data.get('moduleProgress') or data.get('progress') or {}
             modules = {}
             if isinstance(prog, dict):
@@ -215,7 +219,7 @@ def get_students_progress():
             overall = round(sum(vals)/len(vals)) if vals else 0
             results.append({
                 'id': s.id,
-                'name': f"{data.get('firstName','')} {data.get('lastName','')}".strip() or data.get('email',''),
+                'name': f"{data.get('firstName','')} {data.get('lastName','')}",
                 'email': data.get('email'),
                 'badge': data.get('badge', 'none'),
                 'overall': overall,
@@ -225,6 +229,7 @@ def get_students_progress():
     except Exception as e:
         print('Error get_students_progress:', e)
         return jsonify({'success': True, 'students': []})
+
 
 @teacher_bp.route('/students/progress/export', methods=['GET'])
 @teacher_required

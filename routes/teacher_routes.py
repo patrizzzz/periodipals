@@ -121,12 +121,11 @@ def validate_teacher_code():
         student_id = session.get('uid')
         if student_id and session.get('role') == 'student':
             student_ref = db.collection('users').document(student_id)
-            # Idempotent upsert to avoid failures when document doesn't exist
-            student_ref.set({
+            student_ref.update({
                 'teacher_id': teacher.id,
                 'teacher_code': teacher_data.get('teacher_code'),
                 'enrolled_at': firestore.SERVER_TIMESTAMP
-            }, merge=True)
+            })
         
         return jsonify({
             'success': True,
@@ -150,48 +149,18 @@ def get_connected_students():
         db = get_firestore()
         teacher_id = session.get('uid')
         
-        # Primary: string schema
-        students_primary = db.collection('users').where('teacher_id', '==', teacher_id).get()
-        student_docs = list(students_primary)
-        
-        # Fallback: legacy map schema where teacher_id is an object with 'id'
-        if not student_docs:
-            students_legacy = db.collection('users').where('teacher_id.id', '==', teacher_id).get()
-            student_docs = list(students_legacy)
-
+        students = db.collection('users').where('teacher_id', '==', teacher_id).get()
         student_list = []
-        for student in student_docs:
-            student_data = student.to_dict() or {}
-
-            # Backfill normalization: if teacher_id is an object, flatten to string id
-            try:
-                t_field = student_data.get('teacher_id')
-                if isinstance(t_field, dict) and t_field.get('id'):
-                    db.collection('users').document(student.id).set({
-                        'teacher_id': str(t_field.get('id')),
-                        'updated_at': firestore.SERVER_TIMESTAMP
-                    }, merge=True)
-            except Exception:
-                pass
-
-            # Normalize timestamp fields to ISO strings for safe JSON
-            last_login = student_data.get('lastLogin')
-            try:
-                last_login_iso = last_login.isoformat() if hasattr(last_login, 'isoformat') else (str(last_login) if last_login is not None else None)
-            except Exception:
-                last_login_iso = None
-
-            name = f"{student_data.get('firstName', '')} {student_data.get('lastName', '')}".strip()
-            if not name:
-                name = student_data.get('email', 'Unknown Student')
-
+        
+        for student in students:
+            student_data = student.to_dict()
             student_list.append({
                 'id': student.id,
-                'name': name,
+                'name': f"{student_data.get('firstName', '')} {student_data.get('lastName', '')}".strip() or student_data.get('email', 'Unknown Student'),
                 'email': student_data.get('email'),
-                'lastActive': last_login_iso,
+                'lastActive': student_data.get('lastLogin', None),
                 'progress': student_data.get('progress', {}),
-                'age_group': student_data.get('age_group') or student_data.get('ageGroup')
+                'age_group': student_data.get('age_group')
             })
             
         return jsonify({
@@ -215,16 +184,7 @@ def get_students_progress():
     try:
         db = get_firestore()
         teacher_id = session.get('uid')
-        # Primary: string schema
-        students_primary = db.collection('users').where('teacher_id', '==', teacher_id).get()
-        student_docs = {s.id: s for s in students_primary}
-        # Fallback: legacy map schema (teacher_id.id == teacher_id)
-        try:
-            students_legacy = db.collection('users').where('teacher_id.id', '==', teacher_id).get()
-            for s in students_legacy:
-                student_docs[s.id] = s
-        except Exception:
-            pass
+        students = db.collection('users').where('teacher_id', '==', teacher_id).get()
 
         def entry_to_percent(entry):
             try:
@@ -244,18 +204,8 @@ def get_students_progress():
             return 0
 
         results = []
-        for s in student_docs.values():
+        for s in students:
             data = s.to_dict() or {}
-            # Normalize legacy teacher_id map to string
-            try:
-                t_field = data.get('teacher_id')
-                if isinstance(t_field, dict) and t_field.get('id'):
-                    db.collection('users').document(s.id).set({
-                        'teacher_id': str(t_field.get('id')),
-                        'updated_at': firestore.SERVER_TIMESTAMP
-                    }, merge=True)
-            except Exception:
-                pass
             prog = data.get('moduleProgress') or data.get('progress') or {}
             modules = {}
             if isinstance(prog, dict):
@@ -436,9 +386,7 @@ def get_teacher_resources():
         resources = []
         
         # If we have a teacher ID (either from student's teacher or current teacher)
-        # Normalize legacy map objects to string id
-        t_id_raw = student_teacher_id or uid
-        teacher_id = t_id_raw.get('id') if isinstance(t_id_raw, dict) else t_id_raw
+        teacher_id = student_teacher_id or uid
         print('Checking resources for teacher_id:', teacher_id)
         if teacher_id:
             query = resources_ref.where('teacher_id', '==', teacher_id)
@@ -762,3 +710,66 @@ def get_quiz_statistics(quiz_id):
     except Exception as e:
         print('Error fetching quiz statistics:', e)
         return jsonify({'error': str(e)}), 500
+
+@teacher_bp.route('/students/drop', methods=['POST'])
+@teacher_required
+def drop_student():
+    try:
+        db = get_firestore()
+        data = request.get_json() or {}
+        student_id = str(data.get('student_id', '')).strip()
+        teacher_id = session.get('uid')
+        if not student_id:
+            return jsonify({'success': False, 'error': 'student_id required'}), 400
+        doc_ref = db.collection('users').document(student_id)
+        doc = doc_ref.get()
+        if not doc.exists:
+            return jsonify({'success': False, 'error': 'student not found'}), 404
+        if doc.to_dict().get('teacher_id') != teacher_id:
+            return jsonify({'success': False, 'error': 'You do not have access to this student'}), 403
+        doc_ref.set({'status': 'dropped'}, merge=True)
+        return jsonify({'success': True})
+    except Exception as e:
+        print('drop_student error:', e)
+        return jsonify({'success': False}), 500
+
+@teacher_bp.route('/students/finish', methods=['POST'])
+@teacher_required
+def finish_student():
+    try:
+        db = get_firestore()
+        data = request.get_json() or {}
+        student_id = str(data.get('student_id', '')).strip()
+        teacher_id = session.get('uid')
+        if not student_id:
+            return jsonify({'success': False, 'error': 'student_id required'}), 400
+        doc_ref = db.collection('users').document(student_id)
+        doc = doc_ref.get()
+        if not doc.exists:
+            return jsonify({'success': False, 'error': 'student not found'}), 404
+        d = doc.to_dict() or {}
+        if d.get('teacher_id') != teacher_id:
+            return jsonify({'success': False, 'error': 'You do not have access to this student'}), 403
+        # Set all modules complete
+        modules = d.get('progress', {})
+        for k in modules:
+            modules[k]['percent'] = 100
+            modules[k]['pre_quiz_completed'] = True
+            modules[k]['post_quiz_completed'] = True
+        # Award gold badge if not present
+        badges = d.get('badges', [])
+        has_gold = any((b['name'] == 'gold') if isinstance(b, dict) else False for b in badges)
+        from datetime import datetime
+        if not has_gold:
+            badges.append({'name': 'gold', 'reason': 'Completed all topics', 'assigned_at': datetime.utcnow().isoformat()})
+        doc_ref.set({
+            'status': 'finished',
+            'badge': 'gold',
+            'badge_updated_at': firestore.SERVER_TIMESTAMP,
+            'badges': badges,
+            'progress': modules
+        }, merge=True)
+        return jsonify({'success': True})
+    except Exception as e:
+        print('finish_student error:', e)
+        return jsonify({'success': False}), 500

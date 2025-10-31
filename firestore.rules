@@ -97,21 +97,5 @@ service cloud.firestore {
         request.resource.data.submittedAt == request.time;
       allow update: if false; // No updating responses after submission
     }
-
-    // Resources collection
-    match /resources/{resourceId} {
-      allow read: if isSignedIn() && (
-        isTeacher() || 
-        (isStudent() && getUser().teacher_id == resource.data.teacher_id)
-      );
-      allow create: if isTeacher() && 
-        request.resource.data.teacher_id == request.auth.uid &&
-        request.resource.data.created_at == request.time;
-      allow update: if isTeacher() && 
-        resource.data.teacher_id == request.auth.uid &&
-        request.resource.data.teacher_id == request.auth.uid;
-      allow delete: if isTeacher() && 
-        resource.data.teacher_id == request.auth.uid;
-    }
   }
 }

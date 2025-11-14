@@ -141,6 +141,15 @@ def validate_teacher_code():
         print('Error validating teacher code:', e)
         return jsonify({'error': 'Failed to validate code'}), 500
 
+def _normalize_teacher_id(teacher_id_value):
+    """Normalize teacher_id to string, handling DocumentReference objects"""
+    if teacher_id_value is None:
+        return None
+    # If it's a DocumentReference, get its ID
+    if hasattr(teacher_id_value, 'id'):
+        return str(teacher_id_value.id)
+    return str(teacher_id_value)
+
 @teacher_bp.route('/students', methods=['GET'])
 @teacher_required
 def get_connected_students():
@@ -149,32 +158,56 @@ def get_connected_students():
         db = get_firestore()
         teacher_id = session.get('uid')
         
+        if not teacher_id:
+            return jsonify({
+                'success': False,
+                'error': 'Teacher ID not found in session',
+                'students': []
+            }), 401
+        
+        teacher_id = str(teacher_id)  # Ensure it's a string for comparison
+        
         # Query for students connected to this teacher - filter by role to ensure we only get students
-        students = db.collection('users').where('teacher_id', '==', teacher_id).where('role', '==', 'student').get()
+        # Use stream() to handle large result sets and avoid query limits
+        students_query = db.collection('users').where('teacher_id', '==', teacher_id).where('role', '==', 'student')
+        students = students_query.stream()
         student_list = []
         
         for student in students:
-            student_data = student.to_dict()
-            student_list.append({
-                'id': student.id,
-                'name': f"{student_data.get('firstName', '')} {student_data.get('lastName', '')}".strip() or student_data.get('email', 'Unknown Student'),
-                'email': student_data.get('email'),
-                'lastActive': student_data.get('lastLogin', None),
-                'progress': student_data.get('progress', {}),
-                'age_group': student_data.get('age_group')
-            })
-            
+            try:
+                student_data = student.to_dict()
+                # Normalize teacher_id to handle DocumentReference objects or string mismatches
+                student_teacher_id = _normalize_teacher_id(student_data.get('teacher_id'))
+                
+                # Double-check that teacher_id matches (handle any data inconsistencies)
+                if student_teacher_id and student_teacher_id == teacher_id:
+                    student_list.append({
+                        'id': student.id,
+                        'name': f"{student_data.get('firstName', '')} {student_data.get('lastName', '')}".strip() or student_data.get('email', 'Unknown Student'),
+                        'email': student_data.get('email'),
+                        'lastActive': student_data.get('lastLogin', None),
+                        'progress': student_data.get('progress', {}),
+                        'age_group': student_data.get('age_group')
+                    })
+            except Exception as e:
+                print(f'Error processing student {student.id}: {e}')
+                continue
+        
+        print(f'Found {len(student_list)} students for teacher {teacher_id}')
         return jsonify({
             'success': True,
-            'students': student_list
+            'students': student_list,
+            'count': len(student_list)
         })
     except Exception as e:
-        print('Error fetching students:', e)
+        print(f'Error fetching students: {e}')
+        import traceback
+        traceback.print_exc()
         return jsonify({
             'success': False,
-            'error': 'Failed to fetch students',
+            'error': f'Failed to fetch students: {str(e)}',
             'students': []
-        })
+        }), 500
 
 @teacher_bp.route('/students/progress', methods=['GET'])
 @teacher_required
@@ -186,7 +219,9 @@ def get_students_progress():
         db = get_firestore()
         teacher_id = session.get('uid')
         # Query for students connected to this teacher - filter by role to ensure we only get students
-        students = db.collection('users').where('teacher_id', '==', teacher_id).where('role', '==', 'student').get()
+        # Use stream() to handle large result sets
+        students_query = db.collection('users').where('teacher_id', '==', teacher_id).where('role', '==', 'student')
+        students = students_query.stream()
 
         def entry_to_percent(entry):
             try:
@@ -240,7 +275,9 @@ def export_students_progress_csv():
         db = get_firestore()
         teacher_id = session.get('uid')
         # Query for students connected to this teacher - filter by role to ensure we only get students
-        students = db.collection('users').where('teacher_id', '==', teacher_id).where('role', '==', 'student').get()
+        # Use stream() to handle large result sets
+        students_query = db.collection('users').where('teacher_id', '==', teacher_id).where('role', '==', 'student')
+        students = students_query.stream()
 
         # Build rows
         rows = []
@@ -482,7 +519,9 @@ def create_teacher_resource():
         try:
             teacher_id = session.get('uid')
             # Query for students connected to this teacher - filter by role to ensure we only get students
-            students = db.collection('users').where('teacher_id', '==', teacher_id).where('role', '==', 'student').get()
+            # Use stream() to handle large result sets
+            students_query = db.collection('users').where('teacher_id', '==', teacher_id).where('role', '==', 'student')
+            students = students_query.stream()
             for s in students:
                 nref = db.collection('notifications').document()
                 nref.set({

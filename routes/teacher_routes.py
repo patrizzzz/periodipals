@@ -149,7 +149,8 @@ def get_connected_students():
         db = get_firestore()
         teacher_id = session.get('uid')
         
-        students = db.collection('users').where('teacher_id', '==', teacher_id).get()
+        # Query for students connected to this teacher - filter by role to ensure we only get students
+        students = db.collection('users').where('teacher_id', '==', teacher_id).where('role', '==', 'student').get()
         student_list = []
         
         for student in students:
@@ -184,7 +185,8 @@ def get_students_progress():
     try:
         db = get_firestore()
         teacher_id = session.get('uid')
-        students = db.collection('users').where('teacher_id', '==', teacher_id).get()
+        # Query for students connected to this teacher - filter by role to ensure we only get students
+        students = db.collection('users').where('teacher_id', '==', teacher_id).where('role', '==', 'student').get()
 
         def entry_to_percent(entry):
             try:
@@ -230,7 +232,6 @@ def get_students_progress():
         print('Error get_students_progress:', e)
         return jsonify({'success': True, 'students': []})
 
-
 @teacher_bp.route('/students/progress/export', methods=['GET'])
 @teacher_required
 def export_students_progress_csv():
@@ -238,7 +239,8 @@ def export_students_progress_csv():
     try:
         db = get_firestore()
         teacher_id = session.get('uid')
-        students = db.collection('users').where('teacher_id', '==', teacher_id).get()
+        # Query for students connected to this teacher - filter by role to ensure we only get students
+        students = db.collection('users').where('teacher_id', '==', teacher_id).where('role', '==', 'student').get()
 
         # Build rows
         rows = []
@@ -479,7 +481,8 @@ def create_teacher_resource():
         # Create notifications for linked students (draft created)
         try:
             teacher_id = session.get('uid')
-            students = db.collection('users').where('teacher_id', '==', teacher_id).get()
+            # Query for students connected to this teacher - filter by role to ensure we only get students
+            students = db.collection('users').where('teacher_id', '==', teacher_id).where('role', '==', 'student').get()
             for s in students:
                 nref = db.collection('notifications').document()
                 nref.set({

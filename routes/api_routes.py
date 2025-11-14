@@ -14,10 +14,14 @@ api_bp = Blueprint('api', __name__)
 
 def get_storage_bucket():
     """Get Firebase storage bucket"""
+    bucket = os.getenv('FIREBASE_STORAGE_BUCKET')
+    if bucket:
+        return storage.bucket(bucket)
+    # Fallback to default if env var not set (consider updating to your new project)
     return storage.bucket('menstrual-hygiene-manage-6b0ed.appspot.com')
 
 # Configure Gemini AI
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') or 'AIzaSyCNwv5fTtlBlpAhj8FqqGAVRuZaVxudyoo'
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') or 'AIzaSyBAcRt9UQnBlHc-k6OG7RNlC22b2tuOqw4'
 GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
 
 # Student profile routes
@@ -229,13 +233,13 @@ def connect_student_teacher():
         teacher = teachers[0]
         teacher_data = teacher.to_dict()
 
-        # Upsert student's teacher fields to avoid race/missing-doc issues
+        # Update student's teacher_id
         student_ref = db.collection('users').document(session['uid'])
-        student_ref.set({
+        student_ref.update({
             'teacher_id': teacher.id,
             'teacher_name': teacher_data.get('email'),  # or name if available
             'connected_at': firestore.SERVER_TIMESTAMP
-        }, merge=True)
+        })
 
         return jsonify({
             'success': True,
@@ -1013,20 +1017,25 @@ def connect_to_teacher():
             
         db = get_firestore()
         
-        # Find teacher by code
-        teachers = db.collection('users').where('teacher_code', '==', teacher_code).limit(1).get()
+        # Find teacher by code - must filter by role to ensure we get a teacher
+        teachers = db.collection('users').where('teacher_code', '==', teacher_code).where('role', '==', 'teacher').limit(1).get()
         if not teachers:
             return jsonify({'error': 'Invalid teacher code'}), 404
             
         teacher = teachers[0]
+        teacher_data = teacher.to_dict()
         
-        # Upsert student document with teacher reference (idempotent)
+        # Use teacher.id (Firestore document ID) which should be the Firebase Auth UID
+        # This ensures the teacher_id matches what the teacher endpoint queries for
+        teacher_uid = teacher.id
+        
+        # Update student document with teacher reference
         student_ref = db.collection('users').document(student_uid)
-        student_ref.set({
-            'teacher_id': teacher.id,
+        student_ref.update({
+            'teacher_id': teacher_uid,
             'teacher_code': teacher_code,
             'updated_at': firestore.SERVER_TIMESTAMP
-        }, merge=True)
+        })
         
         return jsonify({
             'success': True,

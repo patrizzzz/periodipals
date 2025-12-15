@@ -329,6 +329,12 @@
     .module-card:focus .module-description,
     .module-card.active .module-description {
       opacity: 1;
+      color: white;
+    }
+
+    .module-card:hover .module-title,
+    .module-card:focus .module-title {
+      color: white;
     }
 
     /* Welcome back section */

@@ -117,6 +117,11 @@
   .module-card:not(.completed):hover {
     border-color: #ff69b4;
     transform: translateY(-4px);
+    color: white;
+  }
+  .module-card:not(.completed):hover .module-title,
+  .module-card:not(.completed):hover .module-description {
+    color: white;
   }
   .module-status-badge, .completed-badge {
     position: absolute;
@@ -144,7 +149,9 @@
     font-size: 12px;
   }
   .module-card:focus{outline:3px solid rgba(102,126,234,0.12);transform:translateY(-6px);}
-  .module-card:hover{transform:translateY(-6px);box-shadow:0 16px 40px rgba(255, 20, 147, 0.15)}
+  .module-card:hover{transform:translateY(-6px);box-shadow:0 16px 40px rgba(255, 20, 147, 0.15);color:white}
+  .module-card:hover .module-title,
+  .module-card:hover .module-description{color:white}
   .module-icon{font-size:26px;width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--accent),var(--accent-2));color:#fff}
   .module-title{font-weight:700;font-size:1rem}
   .module-description{font-size:0.9rem;color:var(--muted);line-height:1.2}

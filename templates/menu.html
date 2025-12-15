@@ -408,35 +408,11 @@
   .bottom-nav{position:fixed;left:0;right:0;bottom:12px;display:flex;justify-content:space-around;gap:12px;max-width:720px;margin:0 auto;padding:10px;background:rgba(255,255,255,0.96);border-radius:999px;box-shadow:var(--shadow-md);z-index:1200}
   .bottom-nav .nav-item{background:none;border:none;padding:10px 16px;border-radius:999px;cursor:pointer;font-weight:700}
   
-  /* Notification dropdown styling */
-  .notif-dropdown {
-    cursor: default;
-  }
-  .notif-item {
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-  }
-  .notif-item:last-child {
-    margin-bottom: 0;
-  }
-  .notif-item:hover {
-    background: var(--bg, #f3f4f6);
-    border-color: var(--accent, #667eea);
-    transform: translateX(4px);
-  }
+  /* Notification modal styling */
   .notif-item.unread {
-    background: rgba(102, 126, 234, 0.05);
-    border-left: 3px solid var(--accent, #667eea);
+    background: rgba(102, 126, 234, 0.05) !important;
+    border-left: 3px solid var(--accent, #667eea) !important;
     padding-left: 9px;
-  }
-  .notif-item strong {
-    display: block;
-    margin-bottom: 4px;
-    color: var(--text-primary, #1f2937);
   }
 
   /* Teacher resources and cards */
@@ -503,7 +479,6 @@
         <span class="profile-name" id="profileName">Loading...</span>
       </div>
   </div>
-  <div class="notif-dropdown" id="notifDropdown" style="position:fixed;right:16px;top:56px;background:#fff;border-radius:12px;padding:12px;box-shadow:var(--shadow-md);display:none;min-width:320px;z-index:1250;max-height:60vh;overflow:auto"></div>
 
   <div class="main-container">
     <!-- Main Content Section -->
@@ -705,6 +680,20 @@
     </div>
   </div>
   
+  <!-- Notifications Modal -->
+  <div class="modal" id="notificationsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Notifications</h3>
+        <button class="close-btn" id="closeNotifications">&times;</button>
+      </div>
+      <div id="notificationsBody" style="max-height:60vh;overflow:auto;padding-right:6px">
+        <div id="notificationsEmpty" style="color:var(--muted);text-align:center;padding:20px">No notifications yet. Check back later!</div>
+        <div id="notificationsList" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+    </div>
+  </div>
+  
   <!-- Chat overlay / Ask MHM bot (client stub) -->
   <div class="chat-overlay" id="chatOverlay" aria-hidden="true">
     <div class="chat-panel" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
@@ -738,26 +727,25 @@
     <script type="module" src="/static/js/chatbot.js"></script>
     <script type="module">
   // Notifications
-  function toggleNotificationDropdown() {
-    const dd = document.getElementById('notifDropdown');
-    if (!dd) return;
-    const isOpen = dd.style.display === 'block' || dd.style.display === 'flex';
-    if (isOpen) {
-      dd.style.display = 'none';
-      const navNotif = document.getElementById('navNotif');
-      if (navNotif) navNotif.setAttribute('aria-expanded', 'false');
-    } else {
-      // Position dropdown above the bottom nav
-      const navNotif = document.getElementById('navNotif');
-      if (navNotif) {
-        const rect = navNotif.getBoundingClientRect();
-        dd.style.position = 'fixed';
-        dd.style.bottom = (window.innerHeight - rect.top + 12) + 'px';
-        dd.style.right = '16px';
-        dd.style.left = 'auto';
-        navNotif.setAttribute('aria-expanded', 'true');
-      }
-      dd.style.display = 'block';
+  async function openNotificationsModal() {
+    const modal = document.getElementById('notificationsModal');
+    const list = document.getElementById('notificationsList');
+    const empty = document.getElementById('notificationsEmpty');
+    
+    if (!modal || !list) return;
+    
+    try {
+      await fetchNotifications();
+      modal.style.display = 'flex';
+    } catch (error) {
+      console.error('Error opening notifications:', error);
+    }
+  }
+
+  function closeNotificationsModal() {
+    const modal = document.getElementById('notificationsModal');
+    if (modal) {
+      modal.style.display = 'none';
     }
   }
 
@@ -769,35 +757,64 @@
       const unread = list.filter(n=>!n.read).length;
       const badge = document.getElementById('notifBadge');
       if(badge){ badge.style.display = unread>0? 'inline-block':'none'; badge.textContent = unread; }
-      const dd = document.getElementById('notifDropdown');
-      if(dd){
-        dd.innerHTML = list.length? list.map(n=>{
-          const unreadClass = !n.read ? 'unread' : '';
-          return `<div class="notif-item ${unreadClass}" data-id="${n.id}" data-url="${n.url || ''}">
-            <strong>${n.title || 'New lesson available'}</strong>
-            <div style="font-size:12px;color:var(--muted)">${n.created_at? new Date(n.created_at).toLocaleString(): ''}</div>
-            ${n.message ? `<div style="font-size:13px;color:var(--muted);margin-top:4px">${n.message}</div>` : ''}
-          </div>`;
-        }).join('') : '<div class="notif-item">No notifications</div>';
-        dd.querySelectorAll('.notif-item[data-id]').forEach(el=>{
-          el.style.cursor = 'pointer';
-          el.addEventListener('click', async (e)=>{
-            e.stopPropagation();
-            const id = el.getAttribute('data-id');
-            const url = el.getAttribute('data-url');
-            try{ 
-              await fetch(`/api/teacher/notifications/${id}/read`,{method:'POST',credentials:'same-origin'});
-            }catch(e){}
-            dd.style.display='none';
-            const navNotif = document.getElementById('navNotif');
-            if (navNotif) navNotif.setAttribute('aria-expanded', 'false');
-            fetchNotifications();
-            // Navigate to URL if provided
-            if (url) {
-              window.location.href = url;
-            }
+      
+      // Update footer badge
+      const navBadge = document.getElementById('navNotifBadge');
+      if (navBadge) {
+        navBadge.style.display = unread>0? 'inline-block':'none';
+        navBadge.textContent = unread;
+      }
+      
+      // Update modal content
+      const notificationsList = document.getElementById('notificationsList');
+      const notificationsEmpty = document.getElementById('notificationsEmpty');
+      
+      if (notificationsList && notificationsEmpty) {
+        if (list.length === 0) {
+          notificationsEmpty.style.display = 'block';
+          notificationsList.innerHTML = '';
+        } else {
+          notificationsEmpty.style.display = 'none';
+          notificationsList.innerHTML = list.map(n=>{
+            const unreadClass = !n.read ? 'unread' : '';
+            return `<div class="notif-item ${unreadClass}" data-id="${n.id}" data-url="${n.url || ''}" style="padding:12px;border-radius:8px;border:1px solid rgba(15,23,42,0.06);background:#fff;cursor:pointer;transition:all 0.2s ease">
+              <strong style="display:block;margin-bottom:4px;color:var(--text-primary, #1f2937)">${n.title || 'New lesson available'}</strong>
+              <div style="font-size:12px;color:var(--muted)">${n.created_at? new Date(n.created_at).toLocaleString(): ''}</div>
+              ${n.message ? `<div style="font-size:13px;color:var(--muted);margin-top:4px">${n.message}</div>` : ''}
+            </div>`;
+          }).join('');
+          
+          // Add click handlers to notification items
+          notificationsList.querySelectorAll('.notif-item[data-id]').forEach(el=>{
+            el.addEventListener('click', async (e)=>{
+              e.stopPropagation();
+              const id = el.getAttribute('data-id');
+              const url = el.getAttribute('data-url');
+              try{ 
+                await fetch(`/api/teacher/notifications/${id}/read`,{method:'POST',credentials:'same-origin'});
+              }catch(e){}
+              // Navigate to URL if provided
+              if (url) {
+                window.location.href = url;
+              } else {
+                // Refresh notifications after marking as read
+                fetchNotifications();
+              }
+            });
+            
+            // Add hover effect
+            el.addEventListener('mouseenter', function() {
+              this.style.background = 'var(--bg, #f3f4f6)';
+              this.style.borderColor = 'var(--accent, #667eea)';
+              this.style.transform = 'translateX(4px)';
+            });
+            el.addEventListener('mouseleave', function() {
+              this.style.background = '#fff';
+              this.style.borderColor = 'rgba(15,23,42,0.06)';
+              this.style.transform = 'translateX(0)';
+            });
           });
-        });
+        }
       }
     }catch(e){ console.warn('fetchNotifications failed',e); }
   }
@@ -807,35 +824,29 @@
   if (navNotif) {
     navNotif.addEventListener('click', (e) => {
       e.stopPropagation();
-      toggleNotificationDropdown();
+      openNotificationsModal();
     });
   }
   
-  // Close dropdown when clicking outside
-  document.addEventListener('click', (e) => {
-    const dd = document.getElementById('notifDropdown');
-    const navNotif = document.getElementById('navNotif');
-    if (dd && navNotif && !dd.contains(e.target) && !navNotif.contains(e.target)) {
-      dd.style.display = 'none';
-      navNotif.setAttribute('aria-expanded', 'false');
-    }
-  });
+  // Close modal handlers
+  const closeNotifications = document.getElementById('closeNotifications');
+  if (closeNotifications) {
+    closeNotifications.addEventListener('click', closeNotificationsModal);
+  }
+  
+  // Close modal when clicking outside
+  const notificationsModal = document.getElementById('notificationsModal');
+  if (notificationsModal) {
+    notificationsModal.addEventListener('click', (e) => {
+      if (e.target === notificationsModal) {
+        closeNotificationsModal();
+      }
+    });
+  }
+  
+  // Initial fetch and periodic updates
   setInterval(fetchNotifications, 20000);
   fetchNotifications();
-
-  // Keep footer badge in sync
-  async function updateFooterBadge(){
-    try{
-      const r = await fetch('/api/teacher/notifications',{credentials:'same-origin'});
-      const d = await r.json();
-      const list = Array.isArray(d.notifications)? d.notifications: [];
-      const unread = list.filter(n=>!n.read).length;
-      const b = document.getElementById('navNotifBadge');
-      if (b){ b.style.display = unread>0? 'inline-block':'none'; b.textContent = unread; }
-    }catch(e){}
-  }
-  setInterval(updateFooterBadge, 20000);
-  updateFooterBadge();
 
   // Bottom progress percent (averaged across visible modules similar to popup)
   async function updateBottomProgress(){

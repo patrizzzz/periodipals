@@ -21,7 +21,7 @@ def get_storage_bucket():
     return storage.bucket('menstrual-hygiene-manage-6b0ed.appspot.com')
 
 # Configure Gemini AI
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') or 'AIzaSyBAcRt9UQnBlHc-k6OG7RNlC22b2tuOqw4'
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') or 'AIzaSyBaKP_saRfq2b31NgFQPvORqkhM3Y7XxWE'
 GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
 
 # Student profile routes

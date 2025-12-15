@@ -266,7 +266,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(135deg, #4caf50, #388e3c);
+      background: linear-gradient(135deg, #ff69b4, #ff1493);
       opacity: 0;
       transition: opacity 0.3s ease;
       z-index: -1;
@@ -280,7 +280,7 @@
     .module-card:hover,
     .module-card:focus {
       transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 20px 40px rgba(76, 175, 80, 0.2);
+      box-shadow: 0 20px 40px rgba(255, 20, 147, 0.2);
       color: white;
       outline: none;
     }

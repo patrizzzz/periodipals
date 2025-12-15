@@ -407,6 +407,37 @@
   .profile-modal button{padding:8px 10px;border-radius:8px;border:1px solid rgba(15,23,42,0.04);background:#fff;cursor:pointer}
   .bottom-nav{position:fixed;left:0;right:0;bottom:12px;display:flex;justify-content:space-around;gap:12px;max-width:720px;margin:0 auto;padding:10px;background:rgba(255,255,255,0.96);border-radius:999px;box-shadow:var(--shadow-md);z-index:1200}
   .bottom-nav .nav-item{background:none;border:none;padding:10px 16px;border-radius:999px;cursor:pointer;font-weight:700}
+  
+  /* Notification dropdown styling */
+  .notif-dropdown {
+    cursor: default;
+  }
+  .notif-item {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+  .notif-item:last-child {
+    margin-bottom: 0;
+  }
+  .notif-item:hover {
+    background: var(--bg, #f3f4f6);
+    border-color: var(--accent, #667eea);
+    transform: translateX(4px);
+  }
+  .notif-item.unread {
+    background: rgba(102, 126, 234, 0.05);
+    border-left: 3px solid var(--accent, #667eea);
+    padding-left: 9px;
+  }
+  .notif-item strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text-primary, #1f2937);
+  }
 
   /* Teacher resources and cards */
   .resource-card, .activity-card, .upload-card {
@@ -707,6 +738,29 @@
     <script type="module" src="/static/js/chatbot.js"></script>
     <script type="module">
   // Notifications
+  function toggleNotificationDropdown() {
+    const dd = document.getElementById('notifDropdown');
+    if (!dd) return;
+    const isOpen = dd.style.display === 'block' || dd.style.display === 'flex';
+    if (isOpen) {
+      dd.style.display = 'none';
+      const navNotif = document.getElementById('navNotif');
+      if (navNotif) navNotif.setAttribute('aria-expanded', 'false');
+    } else {
+      // Position dropdown above the bottom nav
+      const navNotif = document.getElementById('navNotif');
+      if (navNotif) {
+        const rect = navNotif.getBoundingClientRect();
+        dd.style.position = 'fixed';
+        dd.style.bottom = (window.innerHeight - rect.top + 12) + 'px';
+        dd.style.right = '16px';
+        dd.style.left = 'auto';
+        navNotif.setAttribute('aria-expanded', 'true');
+      }
+      dd.style.display = 'block';
+    }
+  }
+
   async function fetchNotifications(){
     try{
       const r = await fetch('/api/teacher/notifications',{credentials:'same-origin'});
@@ -717,30 +771,54 @@
       if(badge){ badge.style.display = unread>0? 'inline-block':'none'; badge.textContent = unread; }
       const dd = document.getElementById('notifDropdown');
       if(dd){
-        dd.innerHTML = list.length? list.map(n=>`<div class=\"notif-item\" data-id=\"${n.id}\"><strong>${n.title || 'New lesson available'}</strong><div style=\"font-size:12px;color:var(--muted)\">${n.created_at? new Date(n.created_at).toLocaleString(): ''}</div></div>`).join('') : '<div class="notif-item">No notifications</div>';
-        dd.querySelectorAll('.notif-item').forEach(el=>{
-          el.addEventListener('click', async ()=>{
+        dd.innerHTML = list.length? list.map(n=>{
+          const unreadClass = !n.read ? 'unread' : '';
+          return `<div class="notif-item ${unreadClass}" data-id="${n.id}" data-url="${n.url || ''}">
+            <strong>${n.title || 'New lesson available'}</strong>
+            <div style="font-size:12px;color:var(--muted)">${n.created_at? new Date(n.created_at).toLocaleString(): ''}</div>
+            ${n.message ? `<div style="font-size:13px;color:var(--muted);margin-top:4px">${n.message}</div>` : ''}
+          </div>`;
+        }).join('') : '<div class="notif-item">No notifications</div>';
+        dd.querySelectorAll('.notif-item[data-id]').forEach(el=>{
+          el.style.cursor = 'pointer';
+          el.addEventListener('click', async (e)=>{
+            e.stopPropagation();
             const id = el.getAttribute('data-id');
-            try{ await fetch(`/api/teacher/notifications/${id}/read`,{method:'POST',credentials:'same-origin'});}catch(e){}
+            const url = el.getAttribute('data-url');
+            try{ 
+              await fetch(`/api/teacher/notifications/${id}/read`,{method:'POST',credentials:'same-origin'});
+            }catch(e){}
             dd.style.display='none';
+            const navNotif = document.getElementById('navNotif');
+            if (navNotif) navNotif.setAttribute('aria-expanded', 'false');
             fetchNotifications();
+            // Navigate to URL if provided
+            if (url) {
+              window.location.href = url;
+            }
           });
         });
       }
     }catch(e){ console.warn('fetchNotifications failed',e); }
   }
-  const notifBtn = document.getElementById('notifBtn');
-  if (notifBtn) notifBtn.addEventListener('click',()=>{
+  
+  // Add click handler for bottom nav notification button
+  const navNotif = document.getElementById('navNotif');
+  if (navNotif) {
+    navNotif.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleNotificationDropdown();
+    });
+  }
+  
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
     const dd = document.getElementById('notifDropdown');
-    const isOpen = dd.style.display==='block';
-    if (isOpen){ dd.style.display='none'; return; }
-    // Position dropdown aligned to the bell button
-    const rect = notifBtn.getBoundingClientRect();
-    dd.style.position = 'fixed';
-    dd.style.top = (rect.bottom + 8) + 'px';
-    dd.style.left = Math.max(12, rect.right - dd.offsetWidth) + 'px';
-    dd.style.right = 'auto';
-    dd.style.display = 'block';
+    const navNotif = document.getElementById('navNotif');
+    if (dd && navNotif && !dd.contains(e.target) && !navNotif.contains(e.target)) {
+      dd.style.display = 'none';
+      navNotif.setAttribute('aria-expanded', 'false');
+    }
   });
   setInterval(fetchNotifications, 20000);
   fetchNotifications();

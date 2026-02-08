@@ -3,15 +3,15 @@ import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
     // Your web app's Firebase configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyB7j5oSrNFAHHIfLQZvEh-VRg_OVqQ4EQ4",
-      authDomain: "menstrual-hygiene-manage-6b0ed.firebaseapp.com",
-      projectId: "menstrual-hygiene-manage-6b0ed",
-      storageBucket: "menstrual-hygiene-manage-6b0ed.firebasestorage.app",
-      messagingSenderId: "1002865022115",
-      appId: "1:1002865022115:web:ab79150f8a8d82e9171b16",
-      measurementId: "G-SSCG3ZV148"
-    };
+   const firebaseConfig = {
+  apiKey: "AIzaSyArL96zS7YP_wcf5lsYhCpkwBbNJfOY8Mw",
+  authDomain: "menstrual-hygiene-manage-6b0ed.firebaseapp.com",
+  projectId: "menstrual-hygiene-manage-6b0ed",
+  storageBucket: "menstrual-hygiene-manage-6b0ed.firebasestorage.app",
+  messagingSenderId: "1002865022115",
+  appId: "1:1002865022115:web:8fbee7b7bcd484b3171b16",
+  measurementId: "G-86KEE8W77S"
+};
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
